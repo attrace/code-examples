@@ -52,6 +52,15 @@ export interface IEventLog {
   transactionIndex: number;
 }
 
+export interface ERC20Token {
+  address: string;
+  chainId: number;
+  name?: string;
+  symbol?: string;
+  decimals: number;
+  logoURI?: string;
+}
+
 export interface IEventParsed extends LogDescription {
   blockNumber: number;
 }

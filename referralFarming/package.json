@@ -27,7 +27,6 @@
     "@types/react-dom": "^18.0.6",
     "@types/web3": "^1.2.2",
     "assert": "^2.0.0",
-    "events": "^3.3.0",
     "parcel": "^2.2.1",
     "prettier": "^2.7.1",
     "process": "^0.11.10",
@@ -39,6 +38,7 @@
     "utils": "./src/utils",
     "types": "./src/types",
     "api": "./src/api",
-    "services": "./src/services"
+    "services": "./src/services",
+    "config": "./src/config"
   }
 }

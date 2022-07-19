@@ -6,6 +6,17 @@
 .input {
   margin: 5px 0;
 }
-.app h3 {
-  margin: 10px 0;
+.app h4 {
+  margin: 10px 0 0;
+}
+
+.app h2 {
+  margin: 20px 0 0;
+}
+
+.controlBtns {
+  display:  flex;
+  flex-flow: row nowrap;
+  gap: 10px;
+
 }
