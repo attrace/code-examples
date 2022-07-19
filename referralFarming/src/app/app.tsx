@@ -1,14 +1,14 @@
 import { FC, useCallback, useState } from 'react';
-import * as address from '../utils/address';
+import * as address from '../utils/address/address';
 
 import { farms } from '../api';
 
 import styles from './styles.module.css';
 
+const HARDCODED_TOKEN = '0xc778417e063141139fce010982780140aa0cd5ab';
+
 const App: FC = () => {
-  const [referredToken, setReferredToken] = useState(
-    '0xc778417e063141139fce010982780140aa0cd5ab',
-  );
+  const [referredToken, setReferredToken] = useState(HARDCODED_TOKEN);
   const [chainId, setChainId] = useState(4);
 
   const fetchFarmExistsEvents = useCallback(async () => {

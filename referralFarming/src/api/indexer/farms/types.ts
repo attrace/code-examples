@@ -1,6 +1,6 @@
 import { LogDescription } from '@ethersproject/abi';
 
-import { Bytes32, ChainAddress, EvmAddress, FarmHash } from '../../../types';
+import { Bytes32, ChainAddress, EvmAddress, FarmHash } from 'types';
 
 export interface LogParams {
   // Logs from these addresses only

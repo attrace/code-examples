@@ -1,8 +1,8 @@
 import BigNumber from 'bignumber.js';
 import { bytesToHex } from 'web3-utils';
 
-import * as buffer from './buffer';
-import { Bytes32, ChainAddress, EvmAddress, Bytes24 } from '../types';
+import { buffer } from '../buffer';
+import { Bytes32, ChainAddress, EvmAddress, Bytes24 } from 'types';
 
 // export function toReactorAddress(reactorId: string): Uint8Array {
 //   return buffer

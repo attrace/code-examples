@@ -1,7 +1,7 @@
 import { Interface } from '@ethersproject/abi';
 import { keccak256 } from 'web3-utils';
 
-import * as address from '../../../utils/address';
+import { address } from 'utils';
 import { ChainId, ChainAddress, EvmAddress } from 'types';
 
 import { indexer } from '../indexer';
