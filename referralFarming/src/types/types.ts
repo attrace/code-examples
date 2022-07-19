@@ -1,3 +1,5 @@
+import { LogDescription } from '@ethersproject/abi';
+
 // 20-byte hex-encoded "normal" Ethereum Virtual Machine public address.
 // Eg: 0xaa97fed7413a944118db403ce65116dcc4d381e2
 export type Address = string;
@@ -48,4 +50,8 @@ export interface IEventLog {
   topics: Topics;
   transactionHash: Bytes32;
   transactionIndex: number;
+}
+
+export interface IEventParsed extends LogDescription {
+  blockNumber: number;
 }
