@@ -6,7 +6,7 @@ import { ChainId, ChainAddress, EvmAddress } from 'types';
 
 import { indexer } from '../indexer';
 import { IFarmExistEventRes } from './types';
-import { parseFarmExistsEvents } from './eventParsers';
+import { parseFarmExistsEvents } from './parseEvents';
 import { discovery, IDiscovery } from '../../discovery';
 
 const referralFarmsV1Events = [

@@ -7,13 +7,12 @@
     "start": "yarn parcel src/index.html"
   },
   "dependencies": {
+    "browserify": "^17.0.0",
     "cross-fetch": "^3.1.5",
     "lodash": "^4.17.21",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "web3": "^1.7.4",
-    "web3-eth": "^1.7.4",
-    "web3-eth-abi": "^1.7.4"
+    "web3": "^1.7.4"
   },
   "eslintConfig": {
     "extends": [
@@ -36,10 +35,10 @@
     "ts-node": "^10.4.0",
     "typescript": "^4.5.5"
   },
-
   "alias": {
     "utils": "./src/utils",
     "types": "./src/types",
-    "api": "./src/api"
+    "api": "./src/api",
+    "services": "./src/services"
   }
 }

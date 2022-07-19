@@ -25,9 +25,10 @@ export interface IFarmExistsEvent {
   referredTokenDefn: string;
   rewardTokenDefn: string;
   sponsor: string;
+  blockNumber: number;
 }
 
-export type IFarmExistEventRes = Map<string, IFarmExistsEvent>;
+export type IFarmExistEventRes = IFarmExistsEvent[];
 
 export interface IFarmMetastateEventParsed {
   farmHash: string;
