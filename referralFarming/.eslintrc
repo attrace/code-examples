@@ -1,0 +1,23 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "globals": {
+    "JSX": true
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "react",
+    "react-hooks"
+  ],
+  "extends": [
+    "prettier",
+    "prettier/prettier",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "airbnb",
+    "plugin:react/recommended"
+  ]
+}

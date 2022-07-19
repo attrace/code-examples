@@ -1,0 +1,38 @@
+{
+  "name": "attrace-code-examples-referral-farming",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "yarn parcel src/index.html"
+  },
+  "dependencies": {
+    "cross-fetch": "^3.1.5",
+    "lodash": "^4.17.21",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "web3": "^1.7.4",
+    "web3-eth": "^1.7.4",
+    "web3-eth-abi": "^1.7.4"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest",
+      "prettier"
+    ]
+  },
+  "devDependencies": {
+    "@emotion/react": "^11.9.3",
+    "@types/lodash": "^4.14.182",
+    "@types/react-dom": "^18.0.6",
+    "@types/web3": "^1.2.2",
+    "assert": "^2.0.0",
+    "parcel": "^2.2.1",
+    "prettier": "^2.7.1",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.5"
+  }
+}
