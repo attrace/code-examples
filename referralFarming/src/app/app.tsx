@@ -103,7 +103,7 @@ const App: FC = () => {
       );
 
       if (dailyRewardsMap.size) {
-        const newDailyRewards = [];
+        const dailyRewardsWithTokenDetails = [];
 
         for (const [rewardToken, reward] of dailyRewardsMap.entries()) {
           const { address: rewardTokenAddress } =
@@ -113,13 +113,13 @@ const App: FC = () => {
             rewardTokenAddress,
           );
 
-          newDailyRewards.push({
+          dailyRewardsWithTokenDetails.push({
             rewardTokenDetails,
             reward,
           });
         }
 
-        setDailyRewards(newDailyRewards);
+        setDailyRewards(dailyRewardsWithTokenDetails);
       }
     }
   }, [referredToken, chainId, discoveryData]);
@@ -141,15 +141,16 @@ const App: FC = () => {
       const oracleChainId = getOracleChainId(chainId);
       const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
 
-      const dailyRewardsMap = await farms.getRemainingRewardsByReferredToken(
-        farmExistsEvents,
-        oracleUrl,
-      );
+      const remainingRewardsMap =
+        await farms.getRemainingRewardsByReferredToken(
+          farmExistsEvents,
+          oracleUrl,
+        );
 
-      if (dailyRewardsMap.size) {
-        const newDailyRewards = [];
+      if (remainingRewardsMap.size) {
+        const remainingRewardsWithTokenDetails = [];
 
-        for (const [rewardToken, reward] of dailyRewardsMap.entries()) {
+        for (const [rewardToken, reward] of remainingRewardsMap.entries()) {
           const { address: rewardTokenAddress } =
             address.parseChainAddress(rewardToken);
 
@@ -157,13 +158,13 @@ const App: FC = () => {
             rewardTokenAddress,
           );
 
-          newDailyRewards.push({
+          remainingRewardsWithTokenDetails.push({
             rewardTokenDetails,
             reward,
           });
         }
 
-        setRemainingRewards(newDailyRewards);
+        setRemainingRewards(remainingRewardsWithTokenDetails);
       }
     }
   }, [referredToken, chainId, discoveryData]);
