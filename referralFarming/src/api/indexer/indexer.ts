@@ -1,5 +1,3 @@
-import fetch from 'cross-fetch';
-
 import { Airport, Geolocation, Node } from 'api/discovery';
 import { IEventLog } from 'types';
 

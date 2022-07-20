@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import type { PrefixedHexString } from 'ethereumjs-util';
 
 import type { HexTypes, BigIntTypes, Bytes } from './types';
 
@@ -159,29 +160,25 @@ export function toBigInt(
   throw new Error('unsupported');
 }
 
-// Convert internal types to hex prefixed string, eg: '0x0a'
-// Ensure we only convert values if we need them
-// export function toHex(
-//   b: HexTypes | Uint8Array | BigIntTypes | number | BigNumber,
-// ): PrefixedHexString {
-//   if (b instanceof Uint8Array) {
-//     return `0x${bufToHexString(b)}`;
-//   }
-//   // eslint-disable-next-line no-underscore-dangle
-//   if (b instanceof BigNumber || (b as BigNumber)?._isBigNumber === true) {
-//     return (b as BigNumber).toHexString();
-//   }
-//   if (typeof b === 'string') {
-//     if (b.substring(0, 2) !== '0x') throw new Error('invalid string');
-//     return b;
-//   }
-//   if (typeof b === 'bigint' || typeof b === 'number') {
-//     const value = b.toString(16);
-//     if (value.length % 2) {
-//       return `0x0${value}`;
-//     } // E.g: Case b < 16
-//     return `0x${value}`;
-//   }
+// // Convert internal types to hex prefixed string, eg: '0x0a'
+// // Ensure we only convert values if we need them
+export function toHex(
+  b: HexTypes | Uint8Array | BigIntTypes | number,
+): PrefixedHexString {
+  if (b instanceof Uint8Array) {
+    return `0x${bufToHexString(b)}`;
+  }
+  if (typeof b === 'string') {
+    if (b.substring(0, 2) !== '0x') throw new Error('invalid string');
+    return b;
+  }
+  if (typeof b === 'bigint' || typeof b === 'number') {
+    const value = b.toString(16);
+    if (value.length % 2) {
+      return `0x0${value}`;
+    } // E.g: Case b < 16
+    return `0x${value}`;
+  }
 
-//   throw new Error('unsupported');
-// }
+  throw new Error('unsupported');
+}
