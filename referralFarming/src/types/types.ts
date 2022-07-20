@@ -33,6 +33,9 @@ export type FarmHash = string;
 // array containing four topics in string, i. e. '["0x108f...2e02", "0x108f...2e02", "0x108f...2e02", "0x108f...2e02"]'
 type Topics = string;
 
+// APR - annual percentage rate, i.e '69%'
+export type APR = string;
+
 export interface IEventLog {
   address: EvmAddress;
   blockHash: Bytes32;
@@ -64,3 +67,10 @@ export interface ERC20Token {
 export interface IEventParsed extends LogDescription {
   blockNumber: number;
 }
+
+export interface IDataForAPR {
+  lastConfirmedReward: bigint;
+  conversionRate: number;
+}
+
+export type IDataForAPRMap = Map<Address, IDataForAPR>;

@@ -10,7 +10,7 @@ import {
   IDiscoveryRes,
   TokenListMap,
 } from 'api';
-import { address } from 'utils';
+import { address, numbers } from 'utils';
 import { ChainId, getOracleChainId } from 'config';
 import { Address, ERC20Token } from 'types';
 
@@ -18,17 +18,23 @@ import Rewards from './rewards';
 
 import styles from './styles.module.css';
 
+const { calcApr, bigIntToNumber } = numbers;
+const { toChainAddressEthers, parseChainAddress } = address;
+
 const HARDCODED_TOKEN = '0xc778417e063141139fce010982780140aa0cd5ab';
 
 const App: FC = () => {
   const [referredToken, setReferredToken] = useState(HARDCODED_TOKEN);
   const [chainId, setChainId] = useState(ChainId.Rinkeby);
   const [tokensList, setTokensList] = useState<TokenListMap>(new Map());
-  const [tokenDetails, setTokenDetails] = useState<ERC20Token>();
+  const [referTokenDetails, setReferTokenDetails] = useState<ERC20Token>();
   const [discoveryData, setDiscoveryData] = useState<IDiscoveryRes>();
   const [farmCreatedTimestamp, setFarmCreatedTimestamp] = useState<number>();
   const [dailyRewards, setDailyRewards] = useState<Array<any>>([]);
   const [remainingRewards, setRemainingRewards] = useState<Array<any>>([]);
+  const [aprPerRewardToken, setAprPerRewardToken] = useState<
+    { rewardTokenSymbol: string; apr: string }[]
+  >([]);
 
   useEffect(() => {
     const fetchDiscovery = async () => {
@@ -45,9 +51,9 @@ const App: FC = () => {
     }
   }, [chainId, referredToken]);
 
-  const resetState = useCallback(async () => {
+  const resetState = useCallback(() => {
     setTokensList(new Map());
-    setTokenDetails(undefined);
+    setReferTokenDetails(undefined);
     setFarmCreatedTimestamp(undefined);
     setDailyRewards([]);
     setRemainingRewards([]);
@@ -56,7 +62,7 @@ const App: FC = () => {
   const fetchFarmCreatedTimestamp = useCallback(async () => {
     if (!discoveryData || !referredToken) return;
 
-    const referredTokenChainAddress = address.toChainAddressEthers(
+    const referredTokenChainAddress = toChainAddressEthers(
       chainId,
       referredToken,
     );
@@ -194,21 +200,80 @@ const App: FC = () => {
   const fetchReferredTokenDetails = useCallback(async () => {
     const referredTokenDetails = await fetchTokenDetails(referredToken);
     if (referredTokenDetails) {
-      setTokenDetails(referredTokenDetails);
+      setReferTokenDetails(referredTokenDetails);
     }
   }, [referredToken, fetchTokenDetails]);
 
+  const getAPRForReferredToken = useCallback(async () => {
+    if (!discoveryData) return;
+
+    if (referredToken) {
+      const farmExistsEvents = await referralFarmsV1.getFarmExistsEvents(
+        chainId,
+        discoveryData,
+        {
+          referredTokens: [
+            address.toChainAddressEthers(chainId, referredToken),
+          ],
+        },
+      );
+
+      if (farmExistsEvents?.length) {
+        const oracleChainId = getOracleChainId(chainId);
+        const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
+
+        const { aprData, farmTokenSize } = await farms.getAPRForReferredToken(
+          farmExistsEvents,
+          oracleUrl,
+        );
+
+        const newApr: { rewardTokenSymbol: string; apr: string }[] = [];
+
+        if (aprData.size) {
+          for (const [
+            rewardToken,
+            { lastConfirmedReward, conversionRate },
+          ] of aprData.entries()) {
+            const { address } = parseChainAddress(rewardToken);
+            const rewardTokenDetails = await fetchTokenDetails(address);
+
+            const dailyRewardsNumber = bigIntToNumber(
+              lastConfirmedReward.toString(),
+              referTokenDetails?.decimals,
+            );
+            const farmTokenSizeNumber = bigIntToNumber(
+              farmTokenSize.toString(),
+              rewardTokenDetails?.decimals,
+            );
+
+            const apr = calcApr(
+              farmTokenSizeNumber,
+              dailyRewardsNumber * conversionRate,
+            );
+
+            newApr.push({
+              rewardTokenSymbol: rewardTokenDetails?.symbol || '',
+              apr,
+            });
+
+            setAprPerRewardToken(newApr);
+          }
+        }
+      }
+    }
+  }, [referredToken, chainId, discoveryData]);
+
   const details = useMemo(() => {
-    if (!tokenDetails) return [];
+    if (!referTokenDetails) return [];
 
     const details = [];
 
-    for (const [k, v] of Object.entries(tokenDetails)) {
+    for (const [k, v] of Object.entries(referTokenDetails)) {
       details.push({ k, v });
     }
 
     return details;
-  }, [tokenDetails]);
+  }, [referTokenDetails]);
 
   return (
     <div className={styles.app}>
@@ -235,33 +300,62 @@ const App: FC = () => {
         </button>
         <button onClick={fetchDailyRewards}>Get Daily Rewards</button>
         <button onClick={fetchRemainingRewards}>Get Remaining Rewards</button>
+        <button onClick={getAPRForReferredToken}>Get APR</button>
       </div>
 
       <div>
         <h2>Results:</h2>
-        <div>
-          <h4>Farm Created Timestamp:</h4>
-          <div className={styles.resultContent}>{farmCreatedTimestamp}</div>
-        </div>
+        {farmCreatedTimestamp && (
+          <>
+            <h4>Farm Created Timestamp:</h4>
+            <div className={styles.resultContent}>{farmCreatedTimestamp}</div>
+          </>
+        )}
 
-        <h4>Referred Token Details:</h4>
-        <div className={styles.resultContent}>
-          {details.map(({ k, v }) => (
-            <div key={k}>
-              {k} - {v}
+        {!!details.length && (
+          <>
+            <h4>Referred Token Details:</h4>
+            <div className={styles.resultContent}>
+              {details.map(({ k, v }) => (
+                <div key={k}>
+                  {k} - {v}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
 
-        <h4>DailyRewards:</h4>
-        <div className={styles.resultContent}>
-          <Rewards rewards={dailyRewards} />
-        </div>
+        {!!dailyRewards.length && (
+          <>
+            <h4>DailyRewards:</h4>
+            <div className={styles.resultContent}>
+              <Rewards rewards={dailyRewards} />
+            </div>
+          </>
+        )}
 
-        <h4>Remaining Rewards:</h4>
-        <div className={styles.resultContent}>
-          <Rewards rewards={remainingRewards} />
-        </div>
+        {!!remainingRewards.length && (
+          <>
+            <h4>Remaining Rewards:</h4>
+            <div className={styles.resultContent}>
+              <Rewards rewards={remainingRewards} />
+            </div>
+          </>
+        )}
+
+        {!!aprPerRewardToken.length && (
+          <>
+            <h4>APR:</h4>
+            <div>
+              {aprPerRewardToken.map(({ apr, rewardTokenSymbol }) => (
+                <div
+                  key={
+                    apr + rewardTokenSymbol
+                  }>{`${apr} ${rewardTokenSymbol}`}</div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
