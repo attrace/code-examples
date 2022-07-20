@@ -77,6 +77,6 @@ async function getFarmExistsEvents(
   }
 }
 
-export const farms = {
+export const referralFarmsV1 = {
   getFarmExistsEvents,
 };

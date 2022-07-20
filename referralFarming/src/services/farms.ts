@@ -1,9 +1,9 @@
-import { IFarmExistEventRes, IFarmExistsEvent } from 'api/indexer/farms/types';
-import { oracle, TNodeUrl } from 'api';
+import { oracle, TNodeUrl, IFarmExistEventRes, IFarmExistsEvent } from 'api';
 import { web3 } from 'services';
+
 import { ChainAddress, FarmHash } from '../types';
 
-export const aggregateFarmCreatedTimestamp = async (
+export const getFarmCreatedTimestamp = async (
   farmExistsEvents: IFarmExistEventRes,
 ) => {
   const blockNumber = farmExistsEvents[0]?.blockNumber;
@@ -11,7 +11,7 @@ export const aggregateFarmCreatedTimestamp = async (
   return (await web3.provider.eth.getBlock(blockNumber)).timestamp;
 };
 
-export async function aggregateDailyRewardsByReferredToken(
+export async function getDailyRewardsByReferredToken(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {
