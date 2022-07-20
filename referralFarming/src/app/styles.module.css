@@ -6,7 +6,7 @@
 .input {
   margin: 5px 0;
 }
-.app h4 {
+.app h4, h5 {
   margin: 10px 0 0;
 }
 
@@ -18,5 +18,8 @@
   display:  flex;
   flex-flow: row nowrap;
   gap: 10px;
+}
 
+.resultContent {
+  padding-left: 10px;
 }

@@ -22,6 +22,7 @@ export interface LogParams {
 }
 
 export interface IFarmExistsEvent {
+  farmHash: FarmHash;
   referredTokenDefn: string;
   rewardTokenDefn: string;
   sponsor: string;

@@ -1,12 +1,22 @@
-import { FC, useCallback, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { aggregation } from 'services';
-import { farms, fetchTokenList, TokenListMap } from 'api';
-import { address } from 'utils';
-import { ChainId } from 'config';
-import { ERC20Token } from 'types';
+
+import {
+  discovery,
+  farms,
+  fetchTokenList,
+  getOracleUrl,
+  IDiscoveryRes,
+  TokenListMap,
+} from 'api';
+import { address, numbers } from 'utils';
+import { ChainId, getOracleChainId } from 'config';
+import { Address, ERC20Token } from 'types';
 
 import styles from './styles.module.css';
+
+const { bigIntToNumber } = numbers;
 
 const HARDCODED_TOKEN = '0xc778417e063141139fce010982780140aa0cd5ab';
 
@@ -17,19 +27,32 @@ const App: FC = () => {
   const [tokenDetails, setTokenDetails] = useState<ERC20Token | undefined>(
     undefined,
   );
+  const [discoveryData, setDiscoveryData] = useState<IDiscoveryRes>();
   const [farmCreatedTimestamp, setFarmCreatedTimestamp] = useState<
     string | number
-  >('-');
+  >('');
+  const [dailyRewards, setDailyRewards] = useState<Array<any>>([]);
+
+  useEffect(() => {
+    const fetchDiscovery = async () => {
+      const discoveryRes = await discovery.getDiscovery();
+      setDiscoveryData(discoveryRes);
+    };
+
+    fetchDiscovery();
+  }, []);
 
   const fetchFarmExistsEvents = useCallback(async () => {
-    const data = await farms.getFarmExistsEvents(chainId, {
+    if (!discoveryData) return;
+
+    const data = await farms.getFarmExistsEvents(chainId, discoveryData, {
       referredTokens: [address.toChainAddressEthers(chainId, referredToken)],
     });
     const farmTimeCreated =
       data && (await aggregation.aggregateFarmCreatedTimestamp(data));
 
     farmTimeCreated && setFarmCreatedTimestamp(farmTimeCreated);
-  }, [referredToken, chainId]);
+  }, [referredToken, chainId, discoveryData]);
 
   const fetchTokensList = useCallback(async () => {
     if (chainId) {
@@ -41,24 +64,81 @@ const App: FC = () => {
     }
   }, [chainId]);
 
-  const getTokenDetails = useCallback(async () => {
-    if (!referredToken) {
-      console.log('invalid input data');
-      return;
-    }
+  const getDailyRewards = useCallback(async () => {
+    if (!discoveryData) return;
 
-    let tokenDetails: ERC20Token | undefined;
-    if (tokensList.size) {
-      tokenDetails = tokensList.get(referredToken);
-    } else if (!tokensList.size) {
-      const list = await fetchTokensList();
-      if (list?.size) {
-        tokenDetails = list.get(referredToken);
+    if (referredToken) {
+      const farmExistsEvents = await farms.getFarmExistsEvents(
+        chainId,
+        discoveryData,
+        {
+          referredTokens: [
+            address.toChainAddressEthers(chainId, referredToken),
+          ],
+        },
+      );
+
+      if (farmExistsEvents?.length) {
+        const oracleChainId = getOracleChainId(chainId);
+        const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
+
+        const dailyRewardsMap =
+          await aggregation.aggregateDailyRewardsByReferredToken(
+            farmExistsEvents,
+            oracleUrl,
+          );
+
+        if (dailyRewardsMap.size) {
+          const newDailyRewards = [];
+
+          for (const [rewardToken, reward] of dailyRewardsMap.entries()) {
+            const { address: rewardTokenAddress } =
+              address.parseChainAddress(rewardToken);
+
+            const rewardTokenDetails = await getTokenDetails(
+              rewardTokenAddress,
+            );
+
+            newDailyRewards.push({
+              rewardTokenDetails,
+              reward,
+            });
+          }
+
+          setDailyRewards(newDailyRewards);
+        }
       }
     }
+  }, [referredToken, chainId, discoveryData]);
 
-    setTokenDetails(tokenDetails);
-  }, [tokensList, referredToken]);
+  const getTokenDetails = useCallback(
+    async (token: Address) => {
+      if (!token) {
+        console.log('invalid input data');
+        return;
+      }
+
+      let tokenDetails: ERC20Token | undefined;
+      if (tokensList.size) {
+        tokenDetails = tokensList.get(token);
+      } else if (!tokensList.size) {
+        const list = await fetchTokensList();
+        if (list?.size) {
+          tokenDetails = list.get(token);
+        }
+      }
+
+      return tokenDetails;
+    },
+    [tokensList],
+  );
+
+  const getReferredTokenDetails = useCallback(async () => {
+    const referredTokenDetails = await getTokenDetails(referredToken);
+    if (referredTokenDetails) {
+      setTokenDetails(referredTokenDetails);
+    }
+  }, [referredToken, getTokenDetails]);
 
   const details = useMemo(() => {
     if (!tokenDetails) return [];
@@ -89,26 +169,46 @@ const App: FC = () => {
         className={styles.input}
       />
       <div className={styles.controlBtns}>
-        <button onClick={getTokenDetails}>Get Referred Token Info</button>
+        <button onClick={getReferredTokenDetails}>
+          Get Referred Token Info
+        </button>
         <button onClick={fetchFarmExistsEvents}>
           Get created at(timestamp)
         </button>
+        <button onClick={getDailyRewards}>Get Daily Rewards</button>
       </div>
 
       <div>
         <h2>Results:</h2>
         <div>
-          <h4>Farm Created Timestamp:</h4> {farmCreatedTimestamp}
+          <h4>Farm Created Timestamp:</h4>
+          <div className={styles.resultContent}>{farmCreatedTimestamp}</div>
         </div>
-        <div>
-          <h4>Token Details:</h4>
-          <div>
-            {details.map(({ k, v }) => (
-              <div key={k}>
-                {k} - {v}
-              </div>
-            ))}
-          </div>
+
+        <h4>Referred Token Details:</h4>
+        <div className={styles.resultContent}>
+          {details.map(({ k, v }) => (
+            <div key={k}>
+              {k} - {v}
+            </div>
+          ))}
+        </div>
+
+        <h4>DailyRewards:</h4>
+        <div className={styles.resultContent}>
+          {dailyRewards.map(({ rewardTokenDetails, reward }: any) => (
+            <div key={rewardTokenDetails.symbol}>
+              <h5>
+                {rewardTokenDetails.name}({rewardTokenDetails.address})
+              </h5>
+              BigInt - {reward.toString() + 'n'}
+              <br />
+              {`Number - ${
+                bigIntToNumber(reward, rewardTokenDetails.decimals) +
+                rewardTokenDetails.symbol
+              }`}
+            </div>
+          ))}
         </div>
       </div>
     </div>

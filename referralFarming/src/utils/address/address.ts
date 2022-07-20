@@ -4,20 +4,27 @@ import { bytesToHex } from 'web3-utils';
 import { buffer } from '../buffer';
 import { Bytes32, ChainAddress, EvmAddress, Bytes24 } from 'types';
 
-// export function toReactorAddress(reactorId: string): Uint8Array {
-//   return buffer
-//     .buf(
-//       utils.keccak256(
-//         buffer.buf(
-//           utils.solidityPack(
-//             ['bytes32'],
-//             [utils.formatBytes32String(reactorId)],
-//           ),
-//         ),
-//       ),
-//     )
-//     .slice(0, 20);
-// }
+// TODO: add real value
+const hardcodedKeccak256Res =
+  '0x3e5d7f8ec7f45204e8b0ecc852e29b1b51cf3965096877888eddfd58cf2baac0';
+
+export function toReactorAddress(reactorId: string): Uint8Array {
+  console.log('reactorId', reactorId);
+  return buffer.buf(hardcodedKeccak256Res).slice(0, 20);
+
+  // return buffer
+  //   .buf(
+  //     utils.keccak256(
+  //       buffer.buf(
+  //         utils.solidityPack(
+  //           ['bytes32'],
+  //           [utils.formatBytes32String(reactorId)],
+  //         ),
+  //       ),
+  //     ),
+  //   )
+  //   .slice(0, 20);
+}
 
 function toChainAddress(
   chainId: BigNumber | bigint,
