@@ -1,12 +1,14 @@
 .app {
-  max-width: 500px;
+  max-width: 900px;
   display: flex;
   flex-direction: column;
 }
 .input {
   margin: 5px 0;
+  max-width: 500px;
 }
-.app h4, h5 {
+.app h4,
+h5 {
   margin: 10px 0 0;
 }
 
@@ -15,7 +17,7 @@
 }
 
 .controlBtns {
-  display:  flex;
+  display: flex;
   flex-flow: row nowrap;
   gap: 10px;
 }

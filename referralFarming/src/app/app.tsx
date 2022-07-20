@@ -10,13 +10,13 @@ import {
   IDiscoveryRes,
   TokenListMap,
 } from 'api';
-import { address, numbers } from 'utils';
+import { address } from 'utils';
 import { ChainId, getOracleChainId } from 'config';
 import { Address, ERC20Token } from 'types';
 
-import styles from './styles.module.css';
+import Rewards from './rewards';
 
-const { bigIntToNumber } = numbers;
+import styles from './styles.module.css';
 
 const HARDCODED_TOKEN = '0xc778417e063141139fce010982780140aa0cd5ab';
 
@@ -24,12 +24,11 @@ const App: FC = () => {
   const [referredToken, setReferredToken] = useState(HARDCODED_TOKEN);
   const [chainId, setChainId] = useState(ChainId.Rinkeby);
   const [tokensList, setTokensList] = useState<TokenListMap>(new Map());
-  const [tokenDetails, setTokenDetails] = useState<ERC20Token | undefined>(
-    undefined,
-  );
+  const [tokenDetails, setTokenDetails] = useState<ERC20Token>();
   const [discoveryData, setDiscoveryData] = useState<IDiscoveryRes>();
   const [farmCreatedTimestamp, setFarmCreatedTimestamp] = useState<number>();
   const [dailyRewards, setDailyRewards] = useState<Array<any>>([]);
+  const [remainingRewards, setRemainingRewards] = useState<Array<any>>([]);
 
   useEffect(() => {
     const fetchDiscovery = async () => {
@@ -40,15 +39,32 @@ const App: FC = () => {
     fetchDiscovery();
   }, []);
 
-  const fetchFarmExistsEvents = useCallback(async () => {
-    if (!discoveryData) return;
+  useEffect(() => {
+    if (chainId || referredToken) {
+      resetState();
+    }
+  }, [chainId, referredToken]);
+
+  const resetState = useCallback(async () => {
+    setTokensList(new Map());
+    setTokenDetails(undefined);
+    setFarmCreatedTimestamp(undefined);
+    setDailyRewards([]);
+    setRemainingRewards([]);
+  }, []);
+
+  const fetchFarmCreatedTimestamp = useCallback(async () => {
+    if (!discoveryData || !referredToken) return;
+
+    const referredTokenChainAddress = address.toChainAddressEthers(
+      chainId,
+      referredToken,
+    );
 
     const data = await referralFarmsV1.getFarmExistsEvents(
       chainId,
       discoveryData,
-      {
-        referredTokens: [address.toChainAddressEthers(chainId, referredToken)],
-      },
+      { referredTokens: [referredTokenChainAddress] },
     );
     const farmTimeCreated = data && (await farms.getFarmCreatedTimestamp(data));
 
@@ -63,53 +79,96 @@ const App: FC = () => {
     }
   }, []);
 
-  const getDailyRewards = useCallback(async () => {
-    if (!discoveryData) return;
+  const fetchDailyRewards = useCallback(async () => {
+    if (!discoveryData || !referredToken) return;
 
-    if (referredToken) {
-      const farmExistsEvents = await referralFarmsV1.getFarmExistsEvents(
-        chainId,
-        discoveryData,
-        {
-          referredTokens: [
-            address.toChainAddressEthers(chainId, referredToken),
-          ],
-        },
+    const referredTokenChainAddress = address.toChainAddressEthers(
+      chainId,
+      referredToken,
+    );
+
+    const farmExistsEvents = await referralFarmsV1.getFarmExistsEvents(
+      chainId,
+      discoveryData,
+      { referredTokens: [referredTokenChainAddress] },
+    );
+
+    if (farmExistsEvents?.length) {
+      const oracleChainId = getOracleChainId(chainId);
+      const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
+
+      const dailyRewardsMap = await farms.getDailyRewardsByReferredToken(
+        farmExistsEvents,
+        oracleUrl,
       );
 
-      if (farmExistsEvents?.length) {
-        const oracleChainId = getOracleChainId(chainId);
-        const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
+      if (dailyRewardsMap.size) {
+        const newDailyRewards = [];
 
-        const dailyRewardsMap = await farms.getDailyRewardsByReferredToken(
-          farmExistsEvents,
-          oracleUrl,
-        );
+        for (const [rewardToken, reward] of dailyRewardsMap.entries()) {
+          const { address: rewardTokenAddress } =
+            address.parseChainAddress(rewardToken);
 
-        if (dailyRewardsMap.size) {
-          const newDailyRewards = [];
+          const rewardTokenDetails = await fetchTokenDetails(
+            rewardTokenAddress,
+          );
 
-          for (const [rewardToken, reward] of dailyRewardsMap.entries()) {
-            const { address: rewardTokenAddress } =
-              address.parseChainAddress(rewardToken);
-
-            const rewardTokenDetails = await getTokenDetails(
-              rewardTokenAddress,
-            );
-
-            newDailyRewards.push({
-              rewardTokenDetails,
-              reward,
-            });
-          }
-
-          setDailyRewards(newDailyRewards);
+          newDailyRewards.push({
+            rewardTokenDetails,
+            reward,
+          });
         }
+
+        setDailyRewards(newDailyRewards);
       }
     }
   }, [referredToken, chainId, discoveryData]);
 
-  const getTokenDetails = useCallback(
+  const fetchRemainingRewards = useCallback(async () => {
+    if (!discoveryData || !referredToken) return;
+
+    const referredTokenChainAddress = address.toChainAddressEthers(
+      chainId,
+      referredToken,
+    );
+    const farmExistsEvents = await referralFarmsV1.getFarmExistsEvents(
+      chainId,
+      discoveryData,
+      { referredTokens: [referredTokenChainAddress] },
+    );
+
+    if (farmExistsEvents?.length) {
+      const oracleChainId = getOracleChainId(chainId);
+      const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
+
+      const dailyRewardsMap = await farms.getRemainingRewardsByReferredToken(
+        farmExistsEvents,
+        oracleUrl,
+      );
+
+      if (dailyRewardsMap.size) {
+        const newDailyRewards = [];
+
+        for (const [rewardToken, reward] of dailyRewardsMap.entries()) {
+          const { address: rewardTokenAddress } =
+            address.parseChainAddress(rewardToken);
+
+          const rewardTokenDetails = await fetchTokenDetails(
+            rewardTokenAddress,
+          );
+
+          newDailyRewards.push({
+            rewardTokenDetails,
+            reward,
+          });
+        }
+
+        setRemainingRewards(newDailyRewards);
+      }
+    }
+  }, [referredToken, chainId, discoveryData]);
+
+  const fetchTokenDetails = useCallback(
     async (token: Address) => {
       if (!token) {
         console.log('invalid input data');
@@ -131,12 +190,12 @@ const App: FC = () => {
     [tokensList, chainId],
   );
 
-  const getReferredTokenDetails = useCallback(async () => {
-    const referredTokenDetails = await getTokenDetails(referredToken);
+  const fetchReferredTokenDetails = useCallback(async () => {
+    const referredTokenDetails = await fetchTokenDetails(referredToken);
     if (referredTokenDetails) {
       setTokenDetails(referredTokenDetails);
     }
-  }, [referredToken, getTokenDetails]);
+  }, [referredToken, fetchTokenDetails]);
 
   const details = useMemo(() => {
     if (!tokenDetails) return [];
@@ -167,13 +226,14 @@ const App: FC = () => {
         className={styles.input}
       />
       <div className={styles.controlBtns}>
-        <button onClick={getReferredTokenDetails}>
+        <button onClick={fetchReferredTokenDetails}>
           Get Referred Token Info
         </button>
-        <button onClick={fetchFarmExistsEvents}>
+        <button onClick={fetchFarmCreatedTimestamp}>
           Get created at(timestamp)
         </button>
-        <button onClick={getDailyRewards}>Get Daily Rewards</button>
+        <button onClick={fetchDailyRewards}>Get Daily Rewards</button>
+        <button onClick={fetchRemainingRewards}>Get Remaining Rewards</button>
       </div>
 
       <div>
@@ -194,22 +254,12 @@ const App: FC = () => {
 
         <h4>DailyRewards:</h4>
         <div className={styles.resultContent}>
-          {dailyRewards.map(
-            ({ rewardTokenDetails, reward }: any) =>
-              rewardTokenDetails && (
-                <div key={rewardTokenDetails.symbol}>
-                  <h5>
-                    {rewardTokenDetails.name}({rewardTokenDetails.address})
-                  </h5>
-                  BigInt - {reward.toString() + 'n'}
-                  <br />
-                  {`Number - ${
-                    bigIntToNumber(reward, rewardTokenDetails.decimals) +
-                    rewardTokenDetails.symbol
-                  }`}
-                </div>
-              ),
-          )}
+          <Rewards rewards={dailyRewards} />
+        </div>
+
+        <h4>Remaining Rewards:</h4>
+        <div className={styles.resultContent}>
+          <Rewards rewards={remainingRewards} />
         </div>
       </div>
     </div>
