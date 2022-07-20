@@ -8,7 +8,6 @@ import { buffer, address } from 'utils';
 
 const ifaceReferralFarmsV1Reactor = new Interface([
   'function getLastConfirmationReward(bytes32 farmHash) view returns (uint128)',
-  'function getFarmTokenSize(bytes32 farmHash, bytes24 referredToken) view returns (uint128)',
   'function getFarmTrackedRewardValue(bytes32 farmHash) view returns (uint128)',
 ]);
 
