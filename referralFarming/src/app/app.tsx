@@ -28,9 +28,7 @@ const App: FC = () => {
     undefined,
   );
   const [discoveryData, setDiscoveryData] = useState<IDiscoveryRes>();
-  const [farmCreatedTimestamp, setFarmCreatedTimestamp] = useState<
-    string | number
-  >('');
+  const [farmCreatedTimestamp, setFarmCreatedTimestamp] = useState<number>();
   const [dailyRewards, setDailyRewards] = useState<Array<any>>([]);
 
   useEffect(() => {
@@ -54,18 +52,16 @@ const App: FC = () => {
     );
     const farmTimeCreated = data && (await farms.getFarmCreatedTimestamp(data));
 
-    farmTimeCreated && setFarmCreatedTimestamp(farmTimeCreated);
+    farmTimeCreated && setFarmCreatedTimestamp(Number(farmTimeCreated));
   }, [referredToken, chainId, discoveryData]);
 
-  const fetchTokensList = useCallback(async () => {
-    if (chainId) {
-      const tokenList = await fetchTokenList(chainId);
-      if (tokenList?.size) {
-        setTokensList(tokenList);
-        return tokenList;
-      }
+  const fetchTokensList = useCallback(async (chainId: ChainId) => {
+    const tokenList = await fetchTokenList(chainId);
+    if (tokenList?.size) {
+      setTokensList(tokenList);
+      return tokenList;
     }
-  }, [chainId]);
+  }, []);
 
   const getDailyRewards = useCallback(async () => {
     if (!discoveryData) return;
@@ -124,7 +120,7 @@ const App: FC = () => {
       if (tokensList.size) {
         tokenDetails = tokensList.get(token);
       } else if (!tokensList.size) {
-        const list = await fetchTokensList();
+        const list = await fetchTokensList(chainId);
         if (list?.size) {
           tokenDetails = list.get(token);
         }
@@ -132,7 +128,7 @@ const App: FC = () => {
 
       return tokenDetails;
     },
-    [tokensList],
+    [tokensList, chainId],
   );
 
   const getReferredTokenDetails = useCallback(async () => {
@@ -198,19 +194,22 @@ const App: FC = () => {
 
         <h4>DailyRewards:</h4>
         <div className={styles.resultContent}>
-          {dailyRewards.map(({ rewardTokenDetails, reward }: any) => (
-            <div key={rewardTokenDetails.symbol}>
-              <h5>
-                {rewardTokenDetails.name}({rewardTokenDetails.address})
-              </h5>
-              BigInt - {reward.toString() + 'n'}
-              <br />
-              {`Number - ${
-                bigIntToNumber(reward, rewardTokenDetails.decimals) +
-                rewardTokenDetails.symbol
-              }`}
-            </div>
-          ))}
+          {dailyRewards.map(
+            ({ rewardTokenDetails, reward }: any) =>
+              rewardTokenDetails && (
+                <div key={rewardTokenDetails.symbol}>
+                  <h5>
+                    {rewardTokenDetails.name}({rewardTokenDetails.address})
+                  </h5>
+                  BigInt - {reward.toString() + 'n'}
+                  <br />
+                  {`Number - ${
+                    bigIntToNumber(reward, rewardTokenDetails.decimals) +
+                    rewardTokenDetails.symbol
+                  }`}
+                </div>
+              ),
+          )}
         </div>
       </div>
     </div>
