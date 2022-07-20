@@ -1,10 +1,10 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { aggregation } from 'services';
+import { farms } from 'services';
 
 import {
   discovery,
-  farms,
+  referralFarmsV1,
   fetchTokenList,
   getOracleUrl,
   IDiscoveryRes,
@@ -45,11 +45,14 @@ const App: FC = () => {
   const fetchFarmExistsEvents = useCallback(async () => {
     if (!discoveryData) return;
 
-    const data = await farms.getFarmExistsEvents(chainId, discoveryData, {
-      referredTokens: [address.toChainAddressEthers(chainId, referredToken)],
-    });
-    const farmTimeCreated =
-      data && (await aggregation.aggregateFarmCreatedTimestamp(data));
+    const data = await referralFarmsV1.getFarmExistsEvents(
+      chainId,
+      discoveryData,
+      {
+        referredTokens: [address.toChainAddressEthers(chainId, referredToken)],
+      },
+    );
+    const farmTimeCreated = data && (await farms.getFarmCreatedTimestamp(data));
 
     farmTimeCreated && setFarmCreatedTimestamp(farmTimeCreated);
   }, [referredToken, chainId, discoveryData]);
@@ -68,7 +71,7 @@ const App: FC = () => {
     if (!discoveryData) return;
 
     if (referredToken) {
-      const farmExistsEvents = await farms.getFarmExistsEvents(
+      const farmExistsEvents = await referralFarmsV1.getFarmExistsEvents(
         chainId,
         discoveryData,
         {
@@ -82,11 +85,10 @@ const App: FC = () => {
         const oracleChainId = getOracleChainId(chainId);
         const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
 
-        const dailyRewardsMap =
-          await aggregation.aggregateDailyRewardsByReferredToken(
-            farmExistsEvents,
-            oracleUrl,
-          );
+        const dailyRewardsMap = await farms.getDailyRewardsByReferredToken(
+          farmExistsEvents,
+          oracleUrl,
+        );
 
         if (dailyRewardsMap.size) {
           const newDailyRewards = [];

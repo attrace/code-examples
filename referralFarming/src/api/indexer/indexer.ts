@@ -1,7 +1,7 @@
 import { Airport, Geolocation, Node } from 'api/discovery';
 import { IEventLog } from 'types';
 
-import { LogParams } from './farms/types';
+import { LogParams } from './referralFarmsV1/types';
 import { IResultValue, IResult } from './types';
 
 const toRad = (num: number): number => (num * Math.PI) / 100;

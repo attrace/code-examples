@@ -1,3 +1,3 @@
-export * as aggregation from './aggregation';
+export * as farms from './farms';
 export * as web3 from './web3';
-export * from './http';
+export * from './rpc';
