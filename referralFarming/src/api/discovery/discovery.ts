@@ -7,9 +7,11 @@ const discoveryUrl = 'https://discovery.attrace.com';
 /**
  * @returns JSON containing oracle address etc.
  */
-export async function getDiscovery(): Promise<IDiscoveryRes> {
+export async function getDiscovery<T>(
+  fileName: 'tokenLists.json' | 'mainnet/full.json',
+): Promise<IDiscoveryRes<T>> {
   try {
-    const response = await fetch(`${discoveryUrl}/mainnet/full.json`);
+    const response = await fetch(`${discoveryUrl}/${fileName}`);
 
     const discovery = await response.json();
     const pop = response.headers.get('x-amz-cf-pop') || '';
