@@ -57,6 +57,7 @@ const App: FC = () => {
     setFarmCreatedTimestamp(undefined);
     setDailyRewards([]);
     setRemainingRewards([]);
+    setAprPerRewardToken([]);
   }, []);
 
   const fetchFarmCreatedTimestamp = useCallback(async () => {
