@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 
 import { useData } from './useData';
 
@@ -17,12 +17,20 @@ const App: FC = () => {
     remainingRewards,
     aprPerRewardToken,
     fetchReferredTokenDetails,
-    fetchFarmCreatedTimestamp,
-    fetchDailyRewards,
-    fetchRemainingRewards,
-    fetchAPRForReferredToken,
+    getFarmCreatedTimestamp,
+    getDailyRewards,
+    getRemainingRewards,
+    getAPRForReferredToken,
     referTokenDetails,
   } = useData();
+
+  const referTokenDetailsArr = useMemo(() => {
+    if (!referTokenDetails) return [];
+
+    return Object.entries(referTokenDetails).map(([k, v]) => {
+      return { k, v };
+    });
+  }, [referTokenDetails]);
 
   return (
     <div className={styles.app}>
@@ -44,22 +52,22 @@ const App: FC = () => {
         <button onClick={fetchReferredTokenDetails}>
           Get Referred Token Info
         </button>
-        <button onClick={fetchFarmCreatedTimestamp}>
+        <button onClick={getFarmCreatedTimestamp}>
           Get created at(timestamp)
         </button>
-        <button onClick={fetchDailyRewards}>Get Daily Rewards</button>
-        <button onClick={fetchRemainingRewards}>Get Remaining Rewards</button>
-        <button onClick={fetchAPRForReferredToken}>Get APR</button>
+        <button onClick={getDailyRewards}>Get Daily Rewards</button>
+        <button onClick={getRemainingRewards}>Get Remaining Rewards</button>
+        <button onClick={getAPRForReferredToken}>Get APR</button>
       </div>
 
       <div>
         <h2>Results:</h2>
 
-        {!!referTokenDetails.length && (
+        {!!referTokenDetailsArr.length && (
           <>
             <h4>Referred Token Details:</h4>
             <div className={styles.resultContent}>
-              {referTokenDetails.map(({ k, v }) => (
+              {referTokenDetailsArr.map(({ k, v }) => (
                 <div key={k}>
                   {k} - {v}
                 </div>

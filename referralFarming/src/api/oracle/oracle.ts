@@ -11,7 +11,12 @@ const ifaceReferralFarmsV1Reactor = new Interface([
   'function getFarmTrackedRewardValue(bytes32 farmHash) view returns (uint128)',
 ]);
 
-export async function getLastConfirmationReward(
+/**
+ * get last confirmation reward value from the oracle per farmHash
+ * @param farmHash
+ * @param oracleUrl
+ */
+export async function fetchLastConfirmationReward(
   farmHash: FarmHash,
   oracleUrl: TNodeUrl,
 ): Promise<bigint> {
@@ -20,22 +25,28 @@ export async function getLastConfirmationReward(
     [farmHash],
   );
 
-  return rpc
-    .call<{ to: string; data: string }[], string>(
-      oracleUrl + RpcRoute.rpc,
-      RpcOracleMethod.oracle_call,
-      [
-        {
-          to: buffer.toHex(address.toReactorAddress('referralFarmsV1Reactor')),
-          data,
-        },
-      ],
-    )
-    .then((res) => BigInt(res?.result || '0'))
-    .catch(() => BigInt('0'));
+  const res = await rpc.call<{ to: string; data: string }[], string>(
+    oracleUrl + RpcRoute.rpc,
+    RpcOracleMethod.oracle_call,
+    [
+      {
+        to: buffer.toHex(address.toReactorAddress('referralFarmsV1Reactor')),
+        data,
+      },
+    ],
+  );
+
+  if (res?.result) return BigInt(res?.result);
+
+  return Promise.reject(new Error(res?.error?.message));
 }
 
-export async function getFarmsTrackedRewardsValue(
+/**
+ * get the remaining reward value from the oracle per farmHash
+ * @param farmHash
+ * @param oracleUrl
+ */
+export async function fetchFarmsTrackedRewardsValue(
   farmHash: FarmHash,
   oracleUrl: TNodeUrl,
 ): Promise<bigint> {
@@ -43,27 +54,32 @@ export async function getFarmsTrackedRewardsValue(
     'getFarmTrackedRewardValue',
     [farmHash],
   );
+  const res = await rpc.call<{ to: string; data: string }[], string>(
+    oracleUrl + RpcRoute.rpc,
+    RpcOracleMethod.oracle_call,
+    [
+      {
+        to: buffer.toHex(address.toReactorAddress('referralFarmsV1Reactor')),
+        data,
+      },
+    ],
+  );
+  if (res?.result) return BigInt(res?.result);
 
-  return rpc
-    .call<{ to: string; data: string }[], string>(
-      oracleUrl + RpcRoute.rpc,
-      RpcOracleMethod.oracle_call,
-      [
-        {
-          to: buffer.toHex(address.toReactorAddress('referralFarmsV1Reactor')),
-          data,
-        },
-      ],
-    )
-    .then((res) => BigInt(res?.result || '0'))
-    .catch(() => BigInt('0'));
+  return Promise.reject(new Error(res?.error?.message));
 }
 
 const ifaceFarmTokenSizeV1Reactor = new Interface([
   'function getFarmTokenSize(bytes32 farmHash, bytes24 referredToken) view returns (uint128)',
 ]);
 
-export async function getFarmTokenSize(
+/**
+ * get the farm token size  value from the oracle for referred token per farmHash
+ * @param farmHash
+ * @param referredToken
+ * @param oracleUrl
+ */
+export async function fetchFarmTokenSize(
   farmHash: FarmHash,
   referredToken: ChainAddress,
   oracleUrl: TNodeUrl,
@@ -73,17 +89,18 @@ export async function getFarmTokenSize(
     [farmHash, referredToken],
   );
 
-  return rpc
-    .call<{ to: string; data: string }[], string>(
-      oracleUrl + RpcRoute.rpc,
-      RpcOracleMethod.oracle_call,
-      [
-        {
-          to: buffer.toHex(address.toReactorAddress('farmTokenSizeV1Reactor')),
-          data,
-        },
-      ],
-    )
-    .then((res) => BigInt(res?.result || '0'))
-    .catch(() => BigInt('0'));
+  const res = await rpc.call<{ to: string; data: string }[], string>(
+    oracleUrl + RpcRoute.rpc,
+    RpcOracleMethod.oracle_call,
+    [
+      {
+        to: buffer.toHex(address.toReactorAddress('farmTokenSizeV1Reactor')),
+        data,
+      },
+    ],
+  );
+
+  if (res?.result) return BigInt(res?.result);
+
+  return Promise.reject(new Error(res?.error?.message));
 }

@@ -5,6 +5,11 @@ import { IEventLog, IEventParsed } from 'types';
 
 import { IFarmExistEventRes } from './types';
 
+/**
+ * parses blockchain logs to get only required data
+ * @param items blochain logs array
+ * @param iface abi interface
+ */
 export function parseEvents(
   items: IEventLog[],
   iface: Interface,
@@ -14,7 +19,7 @@ export function parseEvents(
     ['chainId', 'blockNumber', 'logIndex'],
     ['asc', 'asc', 'asc'],
   );
-  const parsed = itemsSorted.map((row) => {
+  return itemsSorted.map((row) => {
     return {
       ...iface.parseLog({
         data: row.data,
@@ -23,9 +28,13 @@ export function parseEvents(
       blockNumber: row.blockNumber,
     };
   });
-  return parsed;
 }
 
+/**
+ * parses blockchain logs to get only required data
+ * @param unparsed blochain logs array
+ * @param iface abi interface
+ */
 export function parseFarmExistsEvents(
   unparsed: IEventLog[],
   iface: Interface,

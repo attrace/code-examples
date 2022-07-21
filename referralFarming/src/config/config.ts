@@ -7,14 +7,10 @@ export enum EOracleChainId {
   'testnet' = 4470,
 }
 
-type TChainId = EChainId.Rinkeby | EChainId.Mainnet;
-
-export const getChainName = (chainId: TChainId): string =>
-  EChainId[chainId] as keyof typeof EChainId;
-
 const OracleChainId = {
   [EChainId.Mainnet]: EOracleChainId.mainnet,
   [EChainId.Rinkeby]: EOracleChainId.testnet,
 };
-export const getOracleChainId = (chainId: TChainId): number =>
-  OracleChainId[chainId];
+export const resolveOracleChainIdByNetwork = (
+  chainId: EChainId,
+): EOracleChainId => OracleChainId[chainId];
