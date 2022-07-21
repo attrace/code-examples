@@ -16,7 +16,7 @@ const ifaceReferralFarmsV1Reactor = new Interface([
  * @param farmHash
  * @param oracleUrl
  */
-export async function getLastConfirmationReward(
+export async function fetchLastConfirmationReward(
   farmHash: FarmHash,
   oracleUrl: TNodeUrl,
 ): Promise<bigint> {
@@ -46,7 +46,7 @@ export async function getLastConfirmationReward(
  * @param farmHash
  * @param oracleUrl
  */
-export async function getFarmsTrackedRewardsValue(
+export async function fetchFarmsTrackedRewardsValue(
   farmHash: FarmHash,
   oracleUrl: TNodeUrl,
 ): Promise<bigint> {
@@ -79,7 +79,7 @@ const ifaceFarmTokenSizeV1Reactor = new Interface([
  * @param referredToken
  * @param oracleUrl
  */
-export async function getFarmTokenSize(
+export async function fetchFarmTokenSize(
   farmHash: FarmHash,
   referredToken: ChainAddress,
   oracleUrl: TNodeUrl,

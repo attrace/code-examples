@@ -17,10 +17,10 @@ const App: FC = () => {
     remainingRewards,
     aprPerRewardToken,
     fetchReferredTokenDetails,
-    fetchFarmCreatedTimestamp,
-    fetchDailyRewards,
-    fetchRemainingRewards,
-    fetchAPRForReferredToken,
+    getFarmCreatedTimestamp,
+    getDailyRewards,
+    getRemainingRewards,
+    getAPRForReferredToken,
     referTokenDetails,
   } = useData();
 
@@ -52,12 +52,12 @@ const App: FC = () => {
         <button onClick={fetchReferredTokenDetails}>
           Get Referred Token Info
         </button>
-        <button onClick={fetchFarmCreatedTimestamp}>
+        <button onClick={getFarmCreatedTimestamp}>
           Get created at(timestamp)
         </button>
-        <button onClick={fetchDailyRewards}>Get Daily Rewards</button>
-        <button onClick={fetchRemainingRewards}>Get Remaining Rewards</button>
-        <button onClick={fetchAPRForReferredToken}>Get APR</button>
+        <button onClick={getDailyRewards}>Get Daily Rewards</button>
+        <button onClick={getRemainingRewards}>Get Remaining Rewards</button>
+        <button onClick={getAPRForReferredToken}>Get APR</button>
       </div>
 
       <div>

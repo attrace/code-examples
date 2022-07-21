@@ -58,7 +58,7 @@ export const useData = () => {
     setAprPerRewardToken([]);
   }, []);
 
-  const fetchFarmCreatedTimestamp = useCallback(async () => {
+  const getFarmCreatedTimestamp = useCallback(async () => {
     if (!discoveryChainData?.data || !referredToken) return;
 
     const referredTokenChainAddress = toChainAddressEthers(
@@ -71,13 +71,12 @@ export const useData = () => {
       discoveryChainData.data,
       { referredTokens: [referredTokenChainAddress] },
     );
-    const farmTimeCreated =
-      data && (await farms.fetchFarmCreatedTimestamp(data));
+    const farmTimeCreated = data && (await farms.getFarmCreatedTimestamp(data));
 
     farmTimeCreated && setFarmCreatedTimestamp(Number(farmTimeCreated));
   }, [referredToken, chainId, discoveryChainData]);
 
-  const fetchDailyRewards = useCallback(async () => {
+  const getDailyRewards = useCallback(async () => {
     if (!discoveryChainData?.data || !referredToken) return;
 
     const referredTokenChainAddress = address.toChainAddressEthers(
@@ -94,7 +93,7 @@ export const useData = () => {
 
     const oracleUrl = resolveOracleUrl(discoveryChainData.data);
 
-    const dailyRewardsMap = await farms.fetchDailyRewardsForFarms(
+    const dailyRewardsMap = await farms.getDailyRewardsForFarms(
       farmExistsEvents,
       oracleUrl,
     );
@@ -119,7 +118,7 @@ export const useData = () => {
     }
   }, [referredToken, chainId, discoveryChainData]);
 
-  const fetchRemainingRewards = useCallback(async () => {
+  const getRemainingRewards = useCallback(async () => {
     if (!discoveryChainData?.data || !referredToken) return;
 
     const referredTokenChainAddress = address.toChainAddressEthers(
@@ -136,7 +135,7 @@ export const useData = () => {
 
     const oracleUrl = resolveOracleUrl(discoveryChainData.data);
 
-    const remainingRewardsMap = await farms.fetchRemainingRewardsForFarms(
+    const remainingRewardsMap = await farms.getRemainingRewardsForFarms(
       farmExistsEvents,
       oracleUrl,
     );
@@ -160,7 +159,7 @@ export const useData = () => {
     }
   }, [referredToken, chainId, discoveryChainData]);
 
-  const fetchAPRForReferredToken = useCallback(async () => {
+  const getAPRForReferredToken = useCallback(async () => {
     if (!discoveryChainData?.data || !referredToken) return;
 
     const referredTokenChainAddress = address.toChainAddressEthers(
@@ -177,7 +176,7 @@ export const useData = () => {
     if (!farmExistsEvents?.length) return;
 
     const oracleUrl = resolveOracleUrl(discoveryChainData.data);
-    const { aprData, farmTokenSize } = await farms.fetchAPRDataForFarms(
+    const { aprData, farmTokenSize } = await farms.getAPRDataForFarms(
       farmExistsEvents,
       oracleUrl,
     );
@@ -263,10 +262,10 @@ export const useData = () => {
     remainingRewards,
     aprPerRewardToken,
     fetchReferredTokenDetails,
-    fetchFarmCreatedTimestamp,
-    fetchDailyRewards,
-    fetchRemainingRewards,
-    fetchAPRForReferredToken,
+    getFarmCreatedTimestamp,
+    getDailyRewards,
+    getRemainingRewards,
+    getAPRForReferredToken,
     referTokenDetails,
   };
 };

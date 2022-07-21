@@ -12,9 +12,12 @@ import { ChainAddress, FarmHash, IDataForAPRMap } from '../types';
 
 const { parseChainAddress } = address;
 
-/*
-  FarmExistEvents array to Map, deletes duplicates
-*/
+/**
+ * Deleted duplicates in FarmExistEvents to keep only one event for one farmHash,
+ * It happens because one farmHash can have many FarmExistEvents in blockchain
+ * @param farmExistsEvents
+ * @returns Map of FarmExistEvents
+ */
 const farmExistsEventsToMap = (farmExistsEvents: IFarmExistEventRes) => {
   const uniqueFarmExistMap = new Map<FarmHash, IFarmExistsEvent>();
   farmExistsEvents.forEach((farmExists) => {
@@ -29,7 +32,7 @@ const farmExistsEventsToMap = (farmExistsEvents: IFarmExistEventRes) => {
  * @param farmExistsEvents should be filtered by one referred token
  * @returns timestamp when first farm was created (first farmExists event emitted)
  */
-export const fetchFarmCreatedTimestamp = async (
+export const getFarmCreatedTimestamp = async (
   farmExistsEvents: IFarmExistEventRes,
 ) => {
   const blockNumber = farmExistsEvents[0]?.blockNumber; //[0] - because first farmExists event emits when farm is created and all events sorted in desc order
@@ -43,7 +46,7 @@ export const fetchFarmCreatedTimestamp = async (
  * @param oracleUrl
  * @returns Map of rewards tokens for this referred token
  */
-export async function fetchDailyRewardsForFarms(
+export async function getDailyRewardsForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {
@@ -55,7 +58,7 @@ export async function fetchDailyRewardsForFarms(
     return new Promise(async (resolve) => {
       for (const v of uniqueFarmExistMap.values()) {
         const { farmHash, rewardTokenDefn } = v;
-        const lastConfirmedReward = await oracle.getLastConfirmationReward(
+        const lastConfirmedReward = await oracle.fetchLastConfirmationReward(
           farmHash,
           oracleUrl,
         );
@@ -76,12 +79,51 @@ export async function fetchDailyRewardsForFarms(
 }
 
 /**
+ * fetching farmTrackedRewardValue per farmHash
+ * @param farmExistsEvents should be filtered by one referred token
+ * @param oracleUrl
+ * @returns Map where key is rewardToken and value is sum of farmTrackedRewardValue for rewardToken<bigint>
+ */
+export async function getRemainingRewardsForFarms(
+  farmExistsEvents: IFarmExistEventRes,
+  oracleUrl: TNodeUrl,
+): Promise<Map<ChainAddress, bigint>> {
+  try {
+    const rewardsPerRewardTokenMap = new Map<ChainAddress, bigint>();
+
+    const uniqueFarmExistMap = new Map<FarmHash, IFarmExistsEvent>();
+    farmExistsEvents.forEach((farmExists) => {
+      uniqueFarmExistMap.set(farmExists.farmHash, farmExists);
+    });
+
+    return new Promise(async (resolve) => {
+      for (const v of uniqueFarmExistMap.values()) {
+        const { farmHash, rewardTokenDefn } = v;
+        const farmsTrackedRewardsValue =
+          await oracle.fetchFarmsTrackedRewardsValue(farmHash, oracleUrl);
+
+        rewardsPerRewardTokenMap.set(
+          rewardTokenDefn,
+          (rewardsPerRewardTokenMap.get(rewardTokenDefn) || 0n) +
+            farmsTrackedRewardsValue,
+        );
+      }
+
+      resolve(rewardsPerRewardTokenMap);
+    });
+  } catch (error) {
+    console.log(error);
+    return Promise.reject(error);
+  }
+}
+
+/**
  * fetching farmTokenSize and lastConfirmedReward per farmHash and aggregating it for APR calculation
  * @param farmExistsEvents should be filtered by one referred token
  * @param oracleUrl
  * @returns Map where key is rewardToken and value is conversion rate(if it exists)<number> and sum of lastConfirmedRewards<bigint> for rewardToken
  */
-export async function fetchAPRDataForFarms(
+export async function getAPRDataForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<{ aprData: IDataForAPRMap; farmTokenSize: bigint }> {
@@ -99,7 +141,7 @@ export async function fetchAPRDataForFarms(
 
     const arr = Array.from(uniqueTokenDefns);
 
-    const exchangeRates = await coingecko.getConversationRateToEth(arr);
+    const exchangeRates = await coingecko.fetchConversationRateToEth(arr);
 
     const { size } = uniqueFarmExistMap;
     let idx = 0;
@@ -111,8 +153,8 @@ export async function fetchAPRDataForFarms(
         const { rewardTokenDefn, referredTokenDefn } = farmExistEvent;
 
         Promise.all([
-          oracle.getFarmTokenSize(key, referredTokenDefn, oracleUrl),
-          oracle.getLastConfirmationReward(key, oracleUrl),
+          oracle.fetchFarmTokenSize(key, referredTokenDefn, oracleUrl),
+          oracle.fetchLastConfirmationReward(key, oracleUrl),
         ]).then(([farmTokenSize, lastConfirmedReward]) => {
           const rewardConversionRate =
             exchangeRates[address.parseChainAddress(rewardTokenDefn).address]
@@ -145,45 +187,6 @@ export async function fetchAPRDataForFarms(
           }
         });
       });
-    });
-  } catch (error) {
-    console.log(error);
-    return Promise.reject(error);
-  }
-}
-
-/**
- * fetching farmTrackedRewardValue per farmHash
- * @param farmExistsEvents should be filtered by one referred token
- * @param oracleUrl
- * @returns Map where key is rewardToken and value is sum of farmTrackedRewardValue for rewardToken<bigint>
- */
-export async function fetchRemainingRewardsForFarms(
-  farmExistsEvents: IFarmExistEventRes,
-  oracleUrl: TNodeUrl,
-): Promise<Map<ChainAddress, bigint>> {
-  try {
-    const rewardsPerRewardTokenMap = new Map<ChainAddress, bigint>();
-
-    const uniqueFarmExistMap = new Map<FarmHash, IFarmExistsEvent>();
-    farmExistsEvents.forEach((farmExists) => {
-      uniqueFarmExistMap.set(farmExists.farmHash, farmExists);
-    });
-
-    return new Promise(async (resolve) => {
-      for (const v of uniqueFarmExistMap.values()) {
-        const { farmHash, rewardTokenDefn } = v;
-        const farmsTrackedRewardsValue =
-          await oracle.getFarmsTrackedRewardsValue(farmHash, oracleUrl);
-
-        rewardsPerRewardTokenMap.set(
-          rewardTokenDefn,
-          (rewardsPerRewardTokenMap.get(rewardTokenDefn) || 0n) +
-            farmsTrackedRewardsValue,
-        );
-      }
-
-      resolve(rewardsPerRewardTokenMap);
     });
   } catch (error) {
     console.log(error);

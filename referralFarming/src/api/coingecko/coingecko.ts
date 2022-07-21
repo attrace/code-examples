@@ -14,7 +14,7 @@ const coingeckoApi =
  * @param token Array of Token Addresses
  * @return Exchange rates for provided token(s) to Ethereum
  */
-export async function getConversationRateToEth(
+export async function fetchConversationRateToEth(
   token: Address[],
 ): Promise<IExchangeRate> {
   try {
