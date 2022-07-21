@@ -1,133 +1,7 @@
-import { TAirport, TGeolocation, TNode } from 'api/discovery';
+import { TAirport, TNode } from 'api/discovery';
 import { IEventLog } from 'types';
 
-import { ILogParams } from './referralFarmsV1/types';
-import { IResultValue, IResult } from './types';
-
-const toRad = (num: number): number => (num * Math.PI) / 100;
-
-function haversine(start: TGeolocation, end: TGeolocation): number {
-  const R = 6371;
-
-  const dLat = toRad(end.lat - start.lat);
-  const dLon = toRad(end.lon - start.lon);
-  const lat1 = toRad(start.lat);
-  const lat2 = toRad(end.lat);
-
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return R * c;
-}
-
-function selectNearestNode(
-  nodes: TNode[],
-  airports: TAirport[],
-  pop: string,
-): TNode | null {
-  const iata = pop.slice(0, 3);
-  const popc = airports.find((ap) => ap.iata === iata);
-
-  if (popc) {
-    let nearest;
-
-    for (const [i] of nodes.entries()) {
-      const n = nodes[i];
-      if (!n.location || !n.location.lat || !n.location.lon) {
-        continue;
-      }
-
-      const d = haversine(popc, n.location);
-      if (!nearest || d < nearest.d) {
-        nearest = {
-          d,
-          n,
-        };
-      }
-    }
-
-    if (nearest) {
-      return nearest.n;
-    }
-  }
-
-  // No nearest found, it's up to the caller to implement another node selection strategy.
-  return null;
-}
-
-function getNearestAndRemainingNodes(
-  nodes: TNode[],
-  airports: TAirport[],
-  pop: string,
-  nearestNodeAmount: number,
-): { nearestNodes: TNode[]; remainingNodes: TNode[] } {
-  let remainingNodes = nodes;
-
-  // get N nearest nodes
-  const nearestNodes: TNode[] = [];
-  for (let i = 0; i < nearestNodeAmount; i += 1) {
-    const nearestNode = selectNearestNode(remainingNodes, airports, pop);
-
-    if (nearestNode) {
-      nearestNodes.push(nearestNode);
-      // filter out a node that is in nearest nodes already
-      remainingNodes = remainingNodes.filter(
-        (node) => node.url !== nearestNode.url,
-      );
-    }
-  }
-
-  return {
-    nearestNodes,
-    remainingNodes,
-  };
-}
-
-async function findQuorum(
-  nodes: TNode[],
-  airports: TAirport[],
-  pop: string,
-  urlPath: string,
-  minQuorum: number,
-): Promise<IResult[]> {
-  let responses: IResult[] = [];
-  let nodeCount = minQuorum;
-
-  // query another nodes among the remaining nodes until quorum is reached
-  while (responses.length < minQuorum) {
-    if (!nodes.length) {
-      break;
-    }
-
-    const { remainingNodes, nearestNodes } = getNearestAndRemainingNodes(
-      nodes,
-      airports,
-      pop,
-      nodeCount,
-    );
-
-    const settledResponses = await Promise.allSettled(
-      nearestNodes.map(
-        async (node) => await (await fetch(`${node.url}${urlPath}`)).json(),
-      ),
-    );
-
-    // filter out failed  responses
-    const fulfilledResponses: PromiseFulfilledResult<IResultValue>[] =
-      settledResponses.filter(
-        (response) => response.status === 'fulfilled',
-      ) as PromiseFulfilledResult<IResultValue>[];
-
-    responses = [...responses, ...fulfilledResponses];
-
-    nodeCount = minQuorum - responses.length;
-    nodes = remainingNodes;
-  }
-
-  return responses;
-}
+import { ILogParams } from './types';
 
 function makeIndexerUrlPath(params: ILogParams): string {
   const parts = [];
@@ -146,7 +20,9 @@ function makeIndexerUrlPath(params: ILogParams): string {
   return `/v1/logsearch?${parts.join('&')}`;
 }
 
-async function queryIndexersWithNearestQuorum(
+const indexerUrl = 'https://indexer.attrace.com';
+
+async function queryIndexer(
   searchParams: ILogParams,
   indexers: TNode[],
   airports: TAirport[],
@@ -158,26 +34,19 @@ async function queryIndexersWithNearestQuorum(
     }
 
     const urlPath = makeIndexerUrlPath(searchParams);
-    const minQuorum = 1;
 
-    const responses = await findQuorum(
-      indexers,
-      airports,
-      pop,
-      urlPath,
-      minQuorum,
-    );
+    const response = await (await fetch(indexerUrl + urlPath)).json();
 
-    if (!responses.length) {
-      throw new Error("Couldn't find nearest indexer node");
+    if (!response) {
+      throw new Error('Indexer response empty');
     }
 
-    return responses[0].value;
+    return response;
   } catch (e) {
-    console.log('queryIndexersWithNearestQuorum error', e);
+    console.log('queryIndexer error', e);
   }
 }
 
 export const indexer = {
-  queryIndexersWithNearestQuorum,
+  queryIndexer,
 };

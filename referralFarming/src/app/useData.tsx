@@ -101,8 +101,7 @@ export const useData = () => {
     // TODO: fetch oracle chains/chainID.json
     const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
 
-    // TODO: getDailyRewardsForReferredToken => getDailyRewardsForFarms
-    const dailyRewardsMap = await farms.getDailyRewardsForReferredToken(
+    const dailyRewardsMap = await farms.getDailyRewardsForFarms(
       farmExistsEvents,
       oracleUrl,
     );
@@ -145,7 +144,7 @@ export const useData = () => {
     const oracleChainId = getOracleChainId(chainId);
     const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
 
-    const remainingRewardsMap = await farms.getRemainingRewardsForReferredToken(
+    const remainingRewardsMap = await farms.getRemainingRewardsForFarms(
       farmExistsEvents,
       oracleUrl,
     );
@@ -216,8 +215,10 @@ export const useData = () => {
         const oracleChainId = getOracleChainId(chainId);
         const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
 
-        const { aprData, farmTokenSize } =
-          await farms.getAPRDataForReferredToken(farmExistsEvents, oracleUrl);
+        const { aprData, farmTokenSize } = await farms.getAPRDataForFarms(
+          farmExistsEvents,
+          oracleUrl,
+        );
 
         const newApr: { rewardTokenSymbol: string; apr: string }[] = [];
 

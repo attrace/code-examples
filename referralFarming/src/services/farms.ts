@@ -43,7 +43,7 @@ export const getFarmCreatedTimestamp = async (
  * @param oracleUrl
  * @returns Map of rewards tokens for this referred token
  */
-export async function getDailyRewardsForReferredToken(
+export async function getDailyRewardsForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {
@@ -76,7 +76,7 @@ export async function getDailyRewardsForReferredToken(
  * @param oracleUrl
  * @returns Map where key is rewardToken and value is conversion rate(if it exists)<number> and sum of lastConfirmedRewards<bigint> for rewardToken
  */
-export async function getAPRDataForReferredToken(
+export async function getAPRDataForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<{ aprData: IDataForAPRMap; farmTokenSize: bigint }> {
@@ -153,7 +153,7 @@ export async function getAPRDataForReferredToken(
  * @param oracleUrl
  * @returns Map where key is rewardToken and value is sum of farmTrackedRewardValue for rewardToken<bigint>
  */
-export async function getRemainingRewardsForReferredToken(
+export async function getRemainingRewardsForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {

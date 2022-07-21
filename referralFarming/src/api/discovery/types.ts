@@ -4,11 +4,7 @@ export type TNode = {
   url: TNodeUrl;
   location: TGeolocation;
 };
-export type TOracleNode = {
-  chainId: number;
-  url: TNodeUrl;
-  location: TGeolocation;
-};
+
 export type TGeolocation = {
   lat: number;
   lon: number;
