@@ -5,10 +5,11 @@ yarn
 yarn start
 ```
 
-[./src/index.tsx](./src/index.tsx) is the entry point to the UI example.
-[./src/app/useData.tsx](./src/app/useData.tsx) includes an example to show the farm on the UI with all details.
+[./src/index.tsx](./src/index.tsx) - entry point to the UI example.
 
-The main datapoints can be found at [farms service](https://github.com/attrace/code-examples/blob/develop/referralFarming/src/services/farms.ts)
+[./src/app/useData.tsx](./src/app/useData.tsx) - example how to display the farm on the UI with all details.
+
+The main datapoints can be found at [farms service](https://github.com/attrace/code-examples/blob/develop/referralFarming/src/services/farms.ts).
 
 ### Project structure
 
@@ -59,5 +60,3 @@ Farm can be created for **Referred** token with different **Reward** tokens:
 2. Referred - WETH, Reward - ZEENUS
 
 ![img.png](img.png)
-
-More info - [here](https://attrace.com/guides/category/referral-farming)
