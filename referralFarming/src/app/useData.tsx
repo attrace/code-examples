@@ -100,7 +100,7 @@ export const useData = () => {
     const oracleChainId = getOracleChainId(chainId);
     const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
 
-    const dailyRewardsMap = await farms.getDailyRewardsByReferredToken(
+    const dailyRewardsMap = await farms.getDailyRewardsForReferredToken(
       farmExistsEvents,
       oracleUrl,
     );
@@ -142,7 +142,7 @@ export const useData = () => {
     const oracleChainId = getOracleChainId(chainId);
     const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
 
-    const remainingRewardsMap = await farms.getRemainingRewardsByReferredToken(
+    const remainingRewardsMap = await farms.getRemainingRewardsForReferredToken(
       farmExistsEvents,
       oracleUrl,
     );

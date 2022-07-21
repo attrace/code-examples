@@ -4,7 +4,7 @@ export enum EChainId {
 }
 export enum EOracleChainId {
   'mainnet' = 147,
-  'testnet' = 4,
+  'testnet' = 4470,
 }
 
 type TChainId = EChainId.Rinkeby | EChainId.Mainnet;

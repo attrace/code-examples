@@ -32,7 +32,7 @@ export const getFarmCreatedTimestamp = async (
   return (await web3.provider.eth.getBlock(blockNumber)).timestamp;
 };
 
-export async function getDailyRewardsByReferredToken(
+export async function getDailyRewardsForReferredToken(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {
@@ -133,7 +133,7 @@ export async function getAPRForReferredToken(
   });
 }
 
-export async function getRemainingRewardsByReferredToken(
+export async function getRemainingRewardsForReferredToken(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {
