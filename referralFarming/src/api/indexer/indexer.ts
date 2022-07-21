@@ -1,7 +1,7 @@
 import { TAirport, TGeolocation, TNode } from 'api/discovery';
 import { IEventLog } from 'types';
 
-import { LogParams } from './referralFarmsV1/types';
+import { ILogParams } from './referralFarmsV1/types';
 import { IResultValue, IResult } from './types';
 
 const toRad = (num: number): number => (num * Math.PI) / 100;
@@ -129,7 +129,7 @@ async function findQuorum(
   return responses;
 }
 
-function makeIndexerUrlPath(params: LogParams): string {
+function makeIndexerUrlPath(params: ILogParams): string {
   const parts = [];
   if (params.addresses)
     params.addresses.forEach((d) => parts.push(`address=${d}`));
@@ -147,7 +147,7 @@ function makeIndexerUrlPath(params: LogParams): string {
 }
 
 async function queryIndexersWithNearestQuorum(
-  searchParams: LogParams,
+  searchParams: ILogParams,
   indexers: TNode[],
   airports: TAirport[],
   pop: string,

@@ -2,7 +2,7 @@ import { LogDescription } from '@ethersproject/abi';
 
 import { Bytes32, ChainAddress, EvmAddress, FarmHash } from 'types';
 
-export interface LogParams {
+export interface ILogParams {
   // Logs from these addresses only
   addresses?: EvmAddress[];
   // Search across all topics
