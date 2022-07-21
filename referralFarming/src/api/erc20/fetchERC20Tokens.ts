@@ -1,6 +1,6 @@
 import { Address, ERC20Token } from 'types';
-import TokenList from '../config/tokenList.json';
-import { getChainName } from '../config';
+import TokenList from './tokenList.json';
+import { getChainName } from '../../config';
 import groupBy from 'lodash/groupBy';
 
 /**
@@ -38,6 +38,10 @@ async function fetchERC20Tokens(
 
 export type TokenListMap = Map<Address, ERC20Token>;
 
+/*
+  Fetches tokensList depends on selected chainId(Mainned or Rinkeby) from Mask and discovery(Attrace) services(see tokenList.json).
+  Then merges them and deleted duplicates.
+ */
 export async function fetchTokenList(chainId: 1 | 4): Promise<TokenListMap> {
   try {
     const tokenListUrls = TokenList.ERC20[getChainName(chainId)];

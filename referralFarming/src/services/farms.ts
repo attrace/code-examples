@@ -12,6 +12,9 @@ import { ChainAddress, FarmHash, IDataForAPRMap } from '../types';
 
 const { parseChainAddress } = address;
 
+/*
+  FarmExistEvents array to Map, deletes duplicates
+*/
 const farmExistsEventsToMap = (farmExistsEvents: IFarmExistEventRes) => {
   const uniqueFarmExistMap = new Map<FarmHash, IFarmExistsEvent>();
   farmExistsEvents.forEach((farmExists) => {
@@ -24,7 +27,7 @@ const farmExistsEventsToMap = (farmExistsEvents: IFarmExistEventRes) => {
 export const getFarmCreatedTimestamp = async (
   farmExistsEvents: IFarmExistEventRes,
 ) => {
-  const blockNumber = farmExistsEvents[0]?.blockNumber;
+  const blockNumber = farmExistsEvents[0]?.blockNumber; //[0] - because first farmExists event emits when farm is created and all events sorted in desc order
 
   return (await web3.provider.eth.getBlock(blockNumber)).timestamp;
 };
