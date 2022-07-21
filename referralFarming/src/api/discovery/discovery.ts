@@ -1,4 +1,4 @@
-import { IDiscovery, IDiscoveryRes } from './types';
+import { IDiscoveryRes } from './types';
 
 const discoveryUrl = 'https://discovery.attrace.com';
 
