@@ -160,8 +160,8 @@ export function toBigInt(
   throw new Error('unsupported');
 }
 
-// // Convert internal types to hex prefixed string, eg: '0x0a'
-// // Ensure we only convert values if we need them
+// Convert internal types to hex prefixed string, eg: '0x0a'
+// Ensure we only convert values if we need them
 export function toHex(
   b: HexTypes | Uint8Array | BigIntTypes | number,
 ): PrefixedHexString {
