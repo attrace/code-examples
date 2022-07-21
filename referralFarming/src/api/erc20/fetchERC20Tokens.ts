@@ -4,8 +4,8 @@ import { getChainName } from '../../config';
 import groupBy from 'lodash/groupBy';
 
 /**
- * Fetch ERC20 tokens from multiple services: Attrace Discovery and Mask
- * @param urls
+ * Fetch ERC20 tokens from provided urls
+ * @param urls Array of urls
  */
 async function fetchERC20Tokens(
   urls: string[],
@@ -38,9 +38,10 @@ async function fetchERC20Tokens(
 
 export type TokenListMap = Map<Address, ERC20Token>;
 
-/*
-  Fetches tokensList depends on selected chainId(Mainned or Rinkeby) from Mask and discovery(Attrace) services(see tokenList.json).
-  Then merges them and deleted duplicates.
+/**
+ * Fetches tokensList depends on selected chainId(Mainned or Rinkeby) from Mask and discovery(Attrace) services(see tokenList.json).
+ * @param chainId Network ID(Rinkeby, Ethereum mainnet etc.)
+ * @return Map where key is tokenAddress and value is ERC20Token
  */
 export async function fetchTokenList(chainId: 1 | 4): Promise<TokenListMap> {
   try {

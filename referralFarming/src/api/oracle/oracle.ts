@@ -12,7 +12,7 @@ const ifaceReferralFarmsV1Reactor = new Interface([
 ]);
 
 /**
- *
+ * get last confirmation reward value from the oracle per farmHash
  * @param farmHash
  * @param oracleUrl
  */
@@ -44,7 +44,6 @@ export async function getLastConfirmationReward(
  * get the remaining reward value from the oracle per farmHash
  * @param farmHash
  * @param oracleUrl
- * @returns
  */
 export async function getFarmsTrackedRewardsValue(
   farmHash: FarmHash,
@@ -73,6 +72,12 @@ const ifaceFarmTokenSizeV1Reactor = new Interface([
   'function getFarmTokenSize(bytes32 farmHash, bytes24 referredToken) view returns (uint128)',
 ]);
 
+/**
+ * get the farm token size  value from the oracle for referred token per farmHash
+ * @param farmHash
+ * @param referredToken
+ * @param oracleUrl
+ */
 export async function getFarmTokenSize(
   farmHash: FarmHash,
   referredToken: ChainAddress,

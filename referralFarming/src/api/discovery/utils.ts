@@ -2,6 +2,12 @@ import { EChainId, EOracleChainId } from 'config';
 
 import { IDiscovery, TNodeUrl } from './index';
 
+/**
+ *
+ * @param discovery Data from discovery service
+ * @param chainId Network ChaindId(Rinkeby, Ethereum mainnet etc.)
+ * @return return ReferralFarmsV1 oracle address from discovery
+ */
 export const resolveReferralFarmsV1Addr = (
   discovery: IDiscovery,
   chainId: EChainId,

@@ -33,6 +33,14 @@ interface ITokenFilter {
   referredTokens?: [ChainAddress];
 }
 
+/**
+ * fetching blockchain logs from indexer
+ * @param chainId Network ChainId(Rinkeby, Ethereum mainnet etc.)
+ * @param discoveryData data from discovery service
+ * @param filter reward/referred token arrays
+ * @param creator creator address
+ * @return parsed farmExistEvents
+ */
 async function getFarmExistsEvents(
   chainId: EChainId,
   discoveryData: IDiscoveryRes,

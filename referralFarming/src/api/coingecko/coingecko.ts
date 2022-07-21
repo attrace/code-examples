@@ -9,6 +9,11 @@ interface IExchangeRate {
 const coingeckoApi =
   'https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=';
 
+/**
+ *
+ * @param token Array of Token Addresses
+ * @return Exchange rates for provided token(s) to Ethereum
+ */
 export async function getConversationRateToEth(
   token: Address[],
 ): Promise<IExchangeRate> {
