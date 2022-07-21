@@ -305,12 +305,6 @@ const App: FC = () => {
 
       <div>
         <h2>Results:</h2>
-        {farmCreatedTimestamp && (
-          <>
-            <h4>Farm Created Timestamp:</h4>
-            <div className={styles.resultContent}>{farmCreatedTimestamp}</div>
-          </>
-        )}
 
         {!!details.length && (
           <>
@@ -322,6 +316,13 @@ const App: FC = () => {
                 </div>
               ))}
             </div>
+          </>
+        )}
+
+        {farmCreatedTimestamp && (
+          <>
+            <h4>Farm Created Timestamp:</h4>
+            <div className={styles.resultContent}>{farmCreatedTimestamp}</div>
           </>
         )}
 
