@@ -4,7 +4,9 @@ yarn
 yarn start
 ```
 
-[./src/index.tsx](./src/index.tsx) is the entry point to the example
+[./src/index.tsx](./src/index.tsx) is the entry point to the UI example.
+[./src/app/useData.tsx](./src/app/useData.tsx)includes example to show the farm on the UI with all details. 
+The main datapoints can be found at [farms service](https://github.com/attrace/code-examples/blob/develop/referralFarming/src/services/farms.ts)
 
 ### Project structure
 - api:
