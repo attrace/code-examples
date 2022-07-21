@@ -39,7 +39,7 @@ export interface IFarmOracles {
   confirmationsV1: TContract[];
 }
 
-export interface IDiscovery {
+export interface IFullDiscovery {
   daos: TDao[];
   indexers: TNode[];
   womOracles: TNode[];
@@ -47,7 +47,16 @@ export interface IDiscovery {
   farmOracles: IFarmOracles;
 }
 
-export interface IDiscoveryRes {
-  data: IDiscovery;
+export interface IDiscoveryRes<T> {
+  data: T;
   pop: string;
 }
+
+export type TTokenList = {
+  tokenLists: {
+    [chainId: string]: {
+      origin: string;
+      url: string;
+    }[];
+  };
+};
