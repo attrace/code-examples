@@ -11,6 +11,11 @@ const ifaceReferralFarmsV1Reactor = new Interface([
   'function getFarmTrackedRewardValue(bytes32 farmHash) view returns (uint128)',
 ]);
 
+/**
+ *
+ * @param farmHash
+ * @param oracleUrl
+ */
 export async function getLastConfirmationReward(
   farmHash: FarmHash,
   oracleUrl: TNodeUrl,

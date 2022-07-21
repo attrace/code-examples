@@ -9,7 +9,7 @@ interface IExchangeRate {
 const coingeckoApi =
   'https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=';
 
-export async function getConversationRate(
+export async function getConversationRateToEth(
   token: Address[],
 ): Promise<IExchangeRate> {
   try {

@@ -25,7 +25,7 @@ const farmExistsEventsToMap = (farmExistsEvents: IFarmExistEventRes) => {
 };
 
 /**
- *
+ * gets timestamp from blockNumber of first farmExistEvent
  * @param farmExistsEvents should be filtered by one referred token
  * @returns timestamp when first farm was created (first farmExists event emitted)
  */
@@ -38,7 +38,7 @@ export const getFarmCreatedTimestamp = async (
 };
 
 /**
- *
+ * fetching lastConfirmedReward per farmHash and aggregating it for APR calculation
  * @param farmExistsEvents should be filtered by one referred token
  * @param oracleUrl
  * @returns Map of rewards tokens for this referred token
@@ -71,12 +71,12 @@ export async function getDailyRewardsForReferredToken(
 }
 
 /**
- *
+ * fetching farmTokenSize and lastConfirmedReward per farmHash and aggregating it for APR calculation
  * @param farmExistsEvents should be filtered by one referred token
  * @param oracleUrl
- * @returns Map of rewards tokens for this referred token
+ * @returns Map where key is rewardToken and value is conversion rate(if it exists)<number> and sum of lastConfirmedRewards<bigint> for rewardToken
  */
-export async function getAPRForReferredToken(
+export async function getAPRDataForReferredToken(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<{ aprData: IDataForAPRMap; farmTokenSize: bigint }> {
@@ -93,14 +93,14 @@ export async function getAPRForReferredToken(
 
   const arr = Array.from(uniqueTokenDefns);
 
-  const exchangeRates = await coingecko.getConversationRate(arr);
+  const exchangeRates = await coingecko.getConversationRateToEth(arr);
 
   const { size } = uniqueFarmExistMap;
   let idx = 0;
 
   let totalFarmTokenSize = 0n;
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     uniqueFarmExistMap.forEach((farmExistEvent, key) => {
       const { rewardTokenDefn, referredTokenDefn } = farmExistEvent;
 
@@ -126,7 +126,7 @@ export async function getAPRForReferredToken(
           totalFarmTokenSize += farmTokenSize;
 
           APRMap.set(rewardTokenDefn, {
-            conversionRate: conversionRate || 0,
+            conversionRate: conversionRate,
             lastConfirmedReward:
               lastConfirmedReward + (prev?.lastConfirmedReward || 0n),
           });
@@ -141,20 +141,17 @@ export async function getAPRForReferredToken(
         })
         .catch((error) => {
           console.log(error);
-          resolve({
-            aprData: new Map(),
-            farmTokenSize: 0n,
-          });
+          reject(error);
         });
     });
   });
 }
 
 /**
- *
+ * fetching farmTrackedRewardValue per farmHash
  * @param farmExistsEvents should be filtered by one referred token
  * @param oracleUrl
- * @returns Map of rewards tokens for this referred token
+ * @returns Map where key is rewardToken and value is sum of farmTrackedRewardValue for rewardToken<bigint>
  */
 export async function getRemainingRewardsForReferredToken(
   farmExistsEvents: IFarmExistEventRes,

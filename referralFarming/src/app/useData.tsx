@@ -216,10 +216,8 @@ export const useData = () => {
         const oracleChainId = getOracleChainId(chainId);
         const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
 
-        const { aprData, farmTokenSize } = await farms.getAPRForReferredToken(
-          farmExistsEvents,
-          oracleUrl,
-        );
+        const { aprData, farmTokenSize } =
+          await farms.getAPRDataForReferredToken(farmExistsEvents, oracleUrl);
 
         const newApr: { rewardTokenSymbol: string; apr: string }[] = [];
 
