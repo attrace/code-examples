@@ -11,9 +11,6 @@ const ifaceReferralFarmsV1Reactor = new Interface([
   'function getFarmTrackedRewardValue(bytes32 farmHash) view returns (uint128)',
 ]);
 
-// TODO: add real value
-const hardcodedReferralFarmsV1Reactor =
-  '0xd02d27c595ea215f9c55eb8ee0c70b78c367935e';
 export async function getLastConfirmationReward(
   farmHash: FarmHash,
   oracleUrl: TNodeUrl,
@@ -29,8 +26,7 @@ export async function getLastConfirmationReward(
       RpcOracleMethod.oracle_call,
       [
         {
-          to: hardcodedReferralFarmsV1Reactor,
-          // to: buffer.toHex(address.toReactorAddress('referralFarmsV1Reactor')),
+          to: buffer.toHex(address.toReactorAddress('referralFarmsV1Reactor')),
           data,
         },
       ],
@@ -54,8 +50,7 @@ export async function getFarmsTrackedRewardsValue(
       RpcOracleMethod.oracle_call,
       [
         {
-          to: hardcodedReferralFarmsV1Reactor,
-          // to: buffer.toHex(address.toReactorAddress('referralFarmsV1Reactor')),
+          to: buffer.toHex(address.toReactorAddress('referralFarmsV1Reactor')),
           data,
         },
       ],
@@ -67,9 +62,7 @@ export async function getFarmsTrackedRewardsValue(
 const ifaceFarmTokenSizeV1Reactor = new Interface([
   'function getFarmTokenSize(bytes32 farmHash, bytes24 referredToken) view returns (uint128)',
 ]);
-// TODO: add real value
-const hardcodedFarmTokenSizeV1Reactor =
-  '0xd02d27c595ea215f9c55eb8ee0c70b78c367935e';
+
 export async function getFarmTokenSize(
   farmHash: FarmHash,
   referredToken: ChainAddress,
@@ -86,8 +79,7 @@ export async function getFarmTokenSize(
       RpcOracleMethod.oracle_call,
       [
         {
-          to: hardcodedFarmTokenSizeV1Reactor,
-          // to: buffer.toHex(address.toReactorAddress('farmTokenSizeV1Reactor')),
+          to: buffer.toHex(address.toReactorAddress('farmTokenSizeV1Reactor')),
           data,
         },
       ],
