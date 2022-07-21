@@ -1,8 +1,8 @@
 import { LogDescription } from '@ethersproject/abi';
 
-import { Bytes32, ChainAddress, EvmAddress, FarmHash } from '../../../types';
+import { Bytes32, ChainAddress, EvmAddress, FarmHash } from 'types';
 
-export interface LogParams {
+export interface ILogParams {
   // Logs from these addresses only
   addresses?: EvmAddress[];
   // Search across all topics
@@ -22,12 +22,14 @@ export interface LogParams {
 }
 
 export interface IFarmExistsEvent {
+  farmHash: FarmHash;
   referredTokenDefn: string;
   rewardTokenDefn: string;
   sponsor: string;
+  blockNumber: number;
 }
 
-export type IFarmExistEventRes = Map<string, IFarmExistsEvent>;
+export type IFarmExistEventRes = IFarmExistsEvent[];
 
 export interface IFarmMetastateEventParsed {
   farmHash: string;

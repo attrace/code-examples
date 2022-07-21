@@ -1,23 +1,22 @@
 import BigNumber from 'bignumber.js';
-import { bytesToHex } from 'web3-utils';
+import { keccak256, bytesToHex, asciiToHex, padRight } from 'web3-utils';
+import { defaultAbiCoder } from '@ethersproject/abi';
 
-import * as buffer from './buffer';
-import { Bytes32, ChainAddress, EvmAddress, Bytes24 } from '../types';
+import { buffer } from '../buffer';
+import { Bytes32, ChainAddress, EvmAddress, Bytes24 } from 'types';
 
-// export function toReactorAddress(reactorId: string): Uint8Array {
-//   return buffer
-//     .buf(
-//       utils.keccak256(
-//         buffer.buf(
-//           utils.solidityPack(
-//             ['bytes32'],
-//             [utils.formatBytes32String(reactorId)],
-//           ),
-//         ),
-//       ),
-//     )
-//     .slice(0, 20);
-// }
+export function toReactorAddress(reactorId: string): Uint8Array {
+  return buffer
+    .buf(
+      keccak256(
+        defaultAbiCoder.encode(
+          ['bytes32'],
+          [padRight(asciiToHex(reactorId), 64)],
+        ),
+      ),
+    )
+    .slice(0, 20);
+}
 
 function toChainAddress(
   chainId: BigNumber | bigint,

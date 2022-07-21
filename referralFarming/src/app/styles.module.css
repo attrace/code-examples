@@ -1,8 +1,27 @@
 .app {
-  max-width: 500px;
+  max-width: 900px;
   display: flex;
   flex-direction: column;
 }
 .input {
   margin: 5px 0;
+  max-width: 500px;
+}
+.app h4,
+h5 {
+  margin: 10px 0 0;
+}
+
+.app h2 {
+  margin: 20px 0 0;
+}
+
+.controlBtns {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 10px;
+}
+
+.resultContent {
+  padding-left: 10px;
 }

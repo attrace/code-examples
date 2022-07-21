@@ -1,2 +1,3 @@
-export * as address from './address';
-export * as buffer from './buffer';
+export * from './address';
+export * from './buffer';
+export * from './numbers';

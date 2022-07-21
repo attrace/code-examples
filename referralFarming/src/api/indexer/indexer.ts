@@ -1,14 +1,12 @@
-import fetch from 'cross-fetch';
-
-import { Airport, Geolocation, Node } from 'api/discovery';
+import { TAirport, TGeolocation, TNode } from 'api/discovery';
 import { IEventLog } from 'types';
 
-import { LogParams } from './farms/types';
+import { ILogParams } from './referralFarmsV1/types';
 import { IResultValue, IResult } from './types';
 
 const toRad = (num: number): number => (num * Math.PI) / 100;
 
-function haversine(start: Geolocation, end: Geolocation): number {
+function haversine(start: TGeolocation, end: TGeolocation): number {
   const R = 6371;
 
   const dLat = toRad(end.lat - start.lat);
@@ -25,10 +23,10 @@ function haversine(start: Geolocation, end: Geolocation): number {
 }
 
 function selectNearestNode(
-  nodes: Node[],
-  airports: Airport[],
+  nodes: TNode[],
+  airports: TAirport[],
   pop: string,
-): Node | null {
+): TNode | null {
   const iata = pop.slice(0, 3);
   const popc = airports.find((ap) => ap.iata === iata);
 
@@ -60,15 +58,15 @@ function selectNearestNode(
 }
 
 function getNearestAndRemainingNodes(
-  nodes: Node[],
-  airports: Airport[],
+  nodes: TNode[],
+  airports: TAirport[],
   pop: string,
   nearestNodeAmount: number,
-): { nearestNodes: Node[]; remainingNodes: Node[] } {
+): { nearestNodes: TNode[]; remainingNodes: TNode[] } {
   let remainingNodes = nodes;
 
   // get N nearest nodes
-  const nearestNodes: Node[] = [];
+  const nearestNodes: TNode[] = [];
   for (let i = 0; i < nearestNodeAmount; i += 1) {
     const nearestNode = selectNearestNode(remainingNodes, airports, pop);
 
@@ -88,8 +86,8 @@ function getNearestAndRemainingNodes(
 }
 
 async function findQuorum(
-  nodes: Node[],
-  airports: Airport[],
+  nodes: TNode[],
+  airports: TAirport[],
   pop: string,
   urlPath: string,
   minQuorum: number,
@@ -131,7 +129,7 @@ async function findQuorum(
   return responses;
 }
 
-function makeIndexerUrlPath(params: LogParams): string {
+function makeIndexerUrlPath(params: ILogParams): string {
   const parts = [];
   if (params.addresses)
     params.addresses.forEach((d) => parts.push(`address=${d}`));
@@ -149,9 +147,9 @@ function makeIndexerUrlPath(params: LogParams): string {
 }
 
 async function queryIndexersWithNearestQuorum(
-  searchParams: LogParams,
-  indexers: Node[],
-  airports: Airport[],
+  searchParams: ILogParams,
+  indexers: TNode[],
+  airports: TAirport[],
   pop: string,
 ): Promise<{ items: IEventLog[] } | undefined> {
   try {

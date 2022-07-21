@@ -1,13 +1,14 @@
 import { Interface } from '@ethersproject/abi';
 import { keccak256 } from 'web3-utils';
 
-import * as address from '../../../utils/address';
-import { ChainId, ChainAddress, EvmAddress } from 'types';
+import { address } from 'utils';
+import { ChainAddress, EvmAddress } from 'types';
+import { EChainId } from 'config';
 
 import { indexer } from '../indexer';
 import { IFarmExistEventRes } from './types';
-import { parseFarmExistsEvents } from './eventParsers';
-import { discovery, IDiscovery } from '../../discovery';
+import { parseFarmExistsEvents } from './parseEvents';
+import { IDiscoveryRes, resolveReferralFarmsV1Addr } from '../../discovery';
 
 const referralFarmsV1Events = [
   'event FarmDepositDecreaseClaimed(bytes32 indexed farmHash, uint128 delta)',
@@ -21,14 +22,6 @@ const referralFarmsV1Events = [
 
 const referralFarmsV1Iface = new Interface(referralFarmsV1Events);
 
-const resolveReferralFarmsV1Addr = (
-  discovery: IDiscovery,
-  supportedChainId: ChainId,
-) =>
-  discovery?.farmOracles?.referralFarmsV1.find(
-    (e) => e.chainId === supportedChainId,
-  )?.address || '';
-
 // Index the events name => id
 const eventIds: { [eventName: string]: string } = {};
 Object.entries(referralFarmsV1Iface.events).forEach(
@@ -41,11 +34,12 @@ interface ITokenFilter {
 }
 
 async function getFarmExistsEvents(
-  chainId: ChainId,
+  chainId: EChainId,
+  discoveryData: IDiscoveryRes,
   filter?: ITokenFilter,
   creator?: EvmAddress,
 ): Promise<IFarmExistEventRes | undefined> {
-  const { data, pop } = await discovery.getDiscovery();
+  const { data, pop } = discoveryData;
   const referralFarmsV1Addr = resolveReferralFarmsV1Addr(data, chainId);
 
   // Allow filtering by creator
@@ -84,6 +78,6 @@ async function getFarmExistsEvents(
   }
 }
 
-export const farms = {
+export const referralFarmsV1 = {
   getFarmExistsEvents,
 };
