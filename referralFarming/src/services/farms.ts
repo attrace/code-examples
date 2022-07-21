@@ -47,27 +47,32 @@ export async function getDailyRewardsForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {
-  const rewardsPerRewardTokenMap = new Map<ChainAddress, bigint>();
+  try {
+    const rewardsPerRewardTokenMap = new Map<ChainAddress, bigint>();
 
-  const uniqueFarmExistMap = farmExistsEventsToMap(farmExistsEvents);
+    const uniqueFarmExistMap = farmExistsEventsToMap(farmExistsEvents);
 
-  return new Promise(async (resolve) => {
-    for (const v of uniqueFarmExistMap.values()) {
-      const { farmHash, rewardTokenDefn } = v;
-      const lastConfirmedReward = await oracle.getLastConfirmationReward(
-        farmHash,
-        oracleUrl,
-      );
+    return new Promise(async (resolve) => {
+      for (const v of uniqueFarmExistMap.values()) {
+        const { farmHash, rewardTokenDefn } = v;
+        const lastConfirmedReward = await oracle.getLastConfirmationReward(
+          farmHash,
+          oracleUrl,
+        );
 
-      rewardsPerRewardTokenMap.set(
-        rewardTokenDefn,
-        (rewardsPerRewardTokenMap.get(rewardTokenDefn) || 0n) +
-          lastConfirmedReward,
-      );
-    }
+        rewardsPerRewardTokenMap.set(
+          rewardTokenDefn,
+          (rewardsPerRewardTokenMap.get(rewardTokenDefn) || 0n) +
+            lastConfirmedReward,
+        );
+      }
 
-    resolve(rewardsPerRewardTokenMap);
-  });
+      resolve(rewardsPerRewardTokenMap);
+    });
+  } catch (error) {
+    console.log(error);
+    return Promise.reject(error);
+  }
 }
 
 /**
@@ -80,35 +85,35 @@ export async function getAPRDataForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<{ aprData: IDataForAPRMap; farmTokenSize: bigint }> {
-  const APRMap: IDataForAPRMap = new Map();
+  try {
+    const APRMap: IDataForAPRMap = new Map();
 
-  const uniqueTokenDefns = new Set<string>();
+    const uniqueTokenDefns = new Set<string>();
 
-  const uniqueFarmExistMap = farmExistsEventsToMap(farmExistsEvents);
+    const uniqueFarmExistMap = farmExistsEventsToMap(farmExistsEvents);
 
-  uniqueFarmExistMap.forEach(({ referredTokenDefn, rewardTokenDefn }) => {
-    uniqueTokenDefns.add(parseChainAddress(referredTokenDefn).address);
-    uniqueTokenDefns.add(parseChainAddress(rewardTokenDefn).address);
-  });
+    uniqueFarmExistMap.forEach(({ referredTokenDefn, rewardTokenDefn }) => {
+      uniqueTokenDefns.add(parseChainAddress(referredTokenDefn).address);
+      uniqueTokenDefns.add(parseChainAddress(rewardTokenDefn).address);
+    });
 
-  const arr = Array.from(uniqueTokenDefns);
+    const arr = Array.from(uniqueTokenDefns);
 
-  const exchangeRates = await coingecko.getConversationRateToEth(arr);
+    const exchangeRates = await coingecko.getConversationRateToEth(arr);
 
-  const { size } = uniqueFarmExistMap;
-  let idx = 0;
+    const { size } = uniqueFarmExistMap;
+    let idx = 0;
 
-  let totalFarmTokenSize = 0n;
+    let totalFarmTokenSize = 0n;
 
-  return new Promise((resolve, reject) => {
-    uniqueFarmExistMap.forEach((farmExistEvent, key) => {
-      const { rewardTokenDefn, referredTokenDefn } = farmExistEvent;
+    return new Promise((resolve) => {
+      uniqueFarmExistMap.forEach((farmExistEvent, key) => {
+        const { rewardTokenDefn, referredTokenDefn } = farmExistEvent;
 
-      Promise.all([
-        oracle.getFarmTokenSize(key, referredTokenDefn, oracleUrl),
-        oracle.getLastConfirmationReward(key, oracleUrl),
-      ])
-        .then(([farmTokenSize, lastConfirmedReward]) => {
+        Promise.all([
+          oracle.getFarmTokenSize(key, referredTokenDefn, oracleUrl),
+          oracle.getLastConfirmationReward(key, oracleUrl),
+        ]).then(([farmTokenSize, lastConfirmedReward]) => {
           const rewardConversionRate =
             exchangeRates[address.parseChainAddress(rewardTokenDefn).address]
               ?.eth;
@@ -138,13 +143,13 @@ export async function getAPRDataForFarms(
               farmTokenSize: totalFarmTokenSize,
             });
           }
-        })
-        .catch((error) => {
-          console.log(error);
-          reject(error);
         });
+      });
     });
-  });
+  } catch (error) {
+    console.log(error);
+    return Promise.reject(error);
+  }
 }
 
 /**
@@ -157,28 +162,31 @@ export async function getRemainingRewardsForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {
-  const rewardsPerRewardTokenMap = new Map<ChainAddress, bigint>();
+  try {
+    const rewardsPerRewardTokenMap = new Map<ChainAddress, bigint>();
 
-  const uniqueFarmExistMap = new Map<FarmHash, IFarmExistsEvent>();
-  farmExistsEvents.forEach((farmExists) => {
-    uniqueFarmExistMap.set(farmExists.farmHash, farmExists);
-  });
+    const uniqueFarmExistMap = new Map<FarmHash, IFarmExistsEvent>();
+    farmExistsEvents.forEach((farmExists) => {
+      uniqueFarmExistMap.set(farmExists.farmHash, farmExists);
+    });
 
-  return new Promise(async (resolve) => {
-    for (const v of uniqueFarmExistMap.values()) {
-      const { farmHash, rewardTokenDefn } = v;
-      const farmsTrackedRewardsValue = await oracle.getFarmsTrackedRewardsValue(
-        farmHash,
-        oracleUrl,
-      );
+    return new Promise(async (resolve) => {
+      for (const v of uniqueFarmExistMap.values()) {
+        const { farmHash, rewardTokenDefn } = v;
+        const farmsTrackedRewardsValue =
+          await oracle.getFarmsTrackedRewardsValue(farmHash, oracleUrl);
 
-      rewardsPerRewardTokenMap.set(
-        rewardTokenDefn,
-        (rewardsPerRewardTokenMap.get(rewardTokenDefn) || 0n) +
-          farmsTrackedRewardsValue,
-      );
-    }
+        rewardsPerRewardTokenMap.set(
+          rewardTokenDefn,
+          (rewardsPerRewardTokenMap.get(rewardTokenDefn) || 0n) +
+            farmsTrackedRewardsValue,
+        );
+      }
 
-    resolve(rewardsPerRewardTokenMap);
-  });
+      resolve(rewardsPerRewardTokenMap);
+    });
+  } catch (error) {
+    console.log(error);
+    return Promise.reject(error);
+  }
 }
