@@ -58,7 +58,7 @@ async function getFarmExistsEvents(
       address.expandBytes24ToBytes32(t),
     );
   }
-
+  // TODO: hardcode https://indexer.attrace.com and romove queryIndexersWithNearestQuorum
   const farmExistsEvents = await indexer.queryIndexersWithNearestQuorum(
     {
       addresses: [referralFarmsV1Addr],

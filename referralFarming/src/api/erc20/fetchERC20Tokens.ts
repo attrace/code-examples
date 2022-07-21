@@ -44,6 +44,7 @@ export type TokenListMap = Map<Address, ERC20Token>;
  */
 export async function fetchTokenList(chainId: 1 | 4): Promise<TokenListMap> {
   try {
+    // TODO: move TokenList to discovery
     const tokenListUrls = TokenList.ERC20[getChainName(chainId)];
     const tokenList = await fetchERC20Tokens(tokenListUrls);
     const tokenListSorted = tokenList.flatMap((list) => list.tokens);

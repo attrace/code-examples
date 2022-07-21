@@ -24,6 +24,11 @@ const farmExistsEventsToMap = (farmExistsEvents: IFarmExistEventRes) => {
   return uniqueFarmExistMap;
 };
 
+/**
+ *
+ * @param farmExistsEvents should be filtered by one referred token
+ * @returns timestamp when first farm was created (first farmExists event emitted)
+ */
 export const getFarmCreatedTimestamp = async (
   farmExistsEvents: IFarmExistEventRes,
 ) => {
@@ -32,6 +37,12 @@ export const getFarmCreatedTimestamp = async (
   return (await web3.provider.eth.getBlock(blockNumber)).timestamp;
 };
 
+/**
+ *
+ * @param farmExistsEvents should be filtered by one referred token
+ * @param oracleUrl
+ * @returns Map of rewards tokens for this referred token
+ */
 export async function getDailyRewardsForReferredToken(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
@@ -59,6 +70,12 @@ export async function getDailyRewardsForReferredToken(
   });
 }
 
+/**
+ *
+ * @param farmExistsEvents should be filtered by one referred token
+ * @param oracleUrl
+ * @returns Map of rewards tokens for this referred token
+ */
 export async function getAPRForReferredToken(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
@@ -133,6 +150,12 @@ export async function getAPRForReferredToken(
   });
 }
 
+/**
+ *
+ * @param farmExistsEvents should be filtered by one referred token
+ * @param oracleUrl
+ * @returns Map of rewards tokens for this referred token
+ */
 export async function getRemainingRewardsForReferredToken(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,

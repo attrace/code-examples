@@ -98,13 +98,16 @@ export const useData = () => {
     if (!farmExistsEvents?.length) return;
 
     const oracleChainId = getOracleChainId(chainId);
+    // TODO: fetch oracle chains/chainID.json
     const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
 
+    // TODO: getDailyRewardsForReferredToken => getDailyRewardsForFarms
     const dailyRewardsMap = await farms.getDailyRewardsForReferredToken(
       farmExistsEvents,
       oracleUrl,
     );
 
+    // resolve token details to show on the UI
     if (dailyRewardsMap.size) {
       const dailyRewardsWithTokenDetails = [];
 
