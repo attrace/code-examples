@@ -13,6 +13,7 @@ import {
 import { address, numbers } from 'utils';
 import { EChainId, getOracleChainId } from 'config';
 import { Address, ERC20Token } from 'types';
+import { IFullDiscovery } from 'api';
 
 const { calcApr, bigIntToNumber } = numbers;
 const { toChainAddressEthers, parseChainAddress } = address;
@@ -24,7 +25,8 @@ export const useData = () => {
   const [chainId, setChainId] = useState(EChainId.Rinkeby);
   const [tokensList, setTokensList] = useState<TokenListMap>(new Map());
   const [referTokenDetails, setReferTokenDetails] = useState<ERC20Token>();
-  const [discoveryData, setDiscoveryData] = useState<IDiscoveryRes>();
+  const [discoveryData, setDiscoveryData] =
+    useState<IDiscoveryRes<IFullDiscovery>>();
   const [farmCreatedTimestamp, setFarmCreatedTimestamp] = useState<number>();
   const [dailyRewards, setDailyRewards] = useState<Array<any>>([]);
   const [remainingRewards, setRemainingRewards] = useState<Array<any>>([]);
@@ -34,7 +36,9 @@ export const useData = () => {
 
   useEffect(() => {
     const fetchDiscovery = async () => {
-      const discoveryRes = await discovery.getDiscovery();
+      const discoveryRes = await discovery.getDiscovery<IFullDiscovery>(
+        'mainnet/full.json',
+      );
       setDiscoveryData(discoveryRes);
     };
 

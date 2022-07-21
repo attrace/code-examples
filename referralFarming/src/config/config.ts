@@ -9,9 +9,6 @@ export enum EOracleChainId {
 
 type TChainId = EChainId.Rinkeby | EChainId.Mainnet;
 
-export const getChainName = (chainId: TChainId): string =>
-  EChainId[chainId] as keyof typeof EChainId;
-
 const OracleChainId = {
   [EChainId.Mainnet]: EOracleChainId.mainnet,
   [EChainId.Rinkeby]: EOracleChainId.testnet,

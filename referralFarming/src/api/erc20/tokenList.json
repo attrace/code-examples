@@ -1,9 +1,0 @@
-{
-    "ERC20": {
-        "Mainnet": [
-            "https://tokens.r2d2.to/latest/1/tokens.json",
-            "https://discovery.attrace.com/mainnet/tokens.json"
-        ],
-        "Rinkeby": ["https://tokens.r2d2.to/latest/4/tokens.json"]
-    }
-}
