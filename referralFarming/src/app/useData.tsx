@@ -11,7 +11,7 @@ import {
   TokenListMap,
 } from 'api';
 import { address, numbers } from 'utils';
-import { ChainId, getOracleChainId } from 'config';
+import { EChainId, getOracleChainId } from 'config';
 import { Address, ERC20Token } from 'types';
 
 const { calcApr, bigIntToNumber } = numbers;
@@ -21,7 +21,7 @@ const HARDCODED_TOKEN = '0xc778417e063141139fce010982780140aa0cd5ab';
 
 export const useData = () => {
   const [referredToken, setReferredToken] = useState(HARDCODED_TOKEN);
-  const [chainId, setChainId] = useState(ChainId.Rinkeby);
+  const [chainId, setChainId] = useState(EChainId.Rinkeby);
   const [tokensList, setTokensList] = useState<TokenListMap>(new Map());
   const [referTokenDetails, setReferTokenDetails] = useState<ERC20Token>();
   const [discoveryData, setDiscoveryData] = useState<IDiscoveryRes>();
@@ -74,7 +74,7 @@ export const useData = () => {
     farmTimeCreated && setFarmCreatedTimestamp(Number(farmTimeCreated));
   }, [referredToken, chainId, discoveryData]);
 
-  const fetchTokensList = useCallback(async (chainId: ChainId) => {
+  const fetchTokensList = useCallback(async (chainId: EChainId) => {
     const tokenList = await fetchTokenList(chainId);
     if (tokenList?.size) {
       setTokensList(tokenList);

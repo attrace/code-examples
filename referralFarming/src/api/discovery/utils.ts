@@ -1,19 +1,17 @@
-import { ChainId } from 'types';
-import { OracleChainId } from 'config';
+import { EChainId, EOracleChainId } from 'config';
 
 import { IDiscovery, TNodeUrl } from './index';
 
 export const resolveReferralFarmsV1Addr = (
   discovery: IDiscovery,
-  supportedChainId: ChainId,
+  chainId: EChainId,
 ) =>
-  discovery?.farmOracles?.referralFarmsV1.find(
-    (e) => e.chainId === supportedChainId,
-  )?.address || '';
+  discovery?.farmOracles?.referralFarmsV1.find((e) => e.chainId === chainId)
+    ?.address || '';
 
 export const getOracleUrl = (
   discovery: IDiscovery,
-  oracleChainId: keyof typeof OracleChainId,
+  oracleChainId: EOracleChainId,
 ): TNodeUrl => {
   return (
     discovery.farmOracles.oracles.find(

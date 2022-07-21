@@ -1,17 +1,20 @@
-export enum ChainId {
+export enum EChainId {
   'Mainnet' = 1,
   'Rinkeby' = 4,
 }
+export enum EOracleChainId {
+  'mainnet' = 147,
+  'testnet' = 4,
+}
 
-type TChainId = ChainId.Rinkeby | ChainId.Mainnet;
-
-export const OracleChainId = {
-  [ChainId.Rinkeby]: 4470,
-  [ChainId.Mainnet]: 147,
-};
+type TChainId = EChainId.Rinkeby | EChainId.Mainnet;
 
 export const getChainName = (chainId: TChainId): string =>
-  ChainId[chainId] as keyof typeof ChainId;
+  EChainId[chainId] as keyof typeof EChainId;
 
+const OracleChainId = {
+  [EChainId.Mainnet]: EOracleChainId.mainnet,
+  [EChainId.Rinkeby]: EOracleChainId.testnet,
+};
 export const getOracleChainId = (chainId: TChainId): number =>
   OracleChainId[chainId];

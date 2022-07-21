@@ -2,7 +2,8 @@ import { Interface } from '@ethersproject/abi';
 import { keccak256 } from 'web3-utils';
 
 import { address } from 'utils';
-import { ChainAddress, ChainId, EvmAddress } from 'types';
+import { ChainAddress, EvmAddress } from 'types';
+import { EChainId } from 'config';
 
 import { indexer } from '../indexer';
 import { IFarmExistEventRes } from './types';
@@ -33,7 +34,7 @@ interface ITokenFilter {
 }
 
 async function getFarmExistsEvents(
-  chainId: ChainId,
+  chainId: EChainId,
   discoveryData: IDiscoveryRes,
   filter?: ITokenFilter,
   creator?: EvmAddress,

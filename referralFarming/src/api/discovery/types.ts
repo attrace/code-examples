@@ -1,49 +1,49 @@
 export type TNodeUrl = string;
 
-export type Node = {
+export type TNode = {
   url: TNodeUrl;
-  location: Geolocation;
+  location: TGeolocation;
 };
-export type OracleNode = {
+export type TOracleNode = {
   chainId: number;
   url: TNodeUrl;
-  location: Geolocation;
+  location: TGeolocation;
 };
-export type Geolocation = {
+export type TGeolocation = {
   lat: number;
   lon: number;
 };
-export type Dao = {
+export type TDao = {
   chainId: number;
   address: string;
   startBlockNumber: number;
 };
-export type Airport = {
+export type TAirport = {
   iata: string;
   lat: number;
   lon: number;
 };
 
-type Contract = {
+type TContract = {
   chainId: number;
   address: string;
 };
 
-export interface Oracle extends Node {
+export interface IOracle extends TNode {
   chainId: number;
 }
 
 export interface IFarmOracles {
-  oracles: Oracle[];
-  referralFarmsV1: Contract[];
-  confirmationsV1: Contract[];
+  oracles: IOracle[];
+  referralFarmsV1: TContract[];
+  confirmationsV1: TContract[];
 }
 
 export interface IDiscovery {
-  daos: Dao[];
-  indexers: Node[];
-  womOracles: Node[];
-  airports: Airport[];
+  daos: TDao[];
+  indexers: TNode[];
+  womOracles: TNode[];
+  airports: TAirport[];
   farmOracles: IFarmOracles;
 }
 
