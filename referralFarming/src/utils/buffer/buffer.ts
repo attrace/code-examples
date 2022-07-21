@@ -38,7 +38,7 @@ export function writeUInt32BE(
       }. Received ${value}`,
     );
   }
-  // eslint-disable-next-line no-bitwise
+
   buff.set([value >>> 24, value >>> 16, value >>> 8, value & 0xff], offset);
 
   return buff;
@@ -62,9 +62,7 @@ const hexSliceLookupTable = (function () {
 function hexSlice(buff: Uint8Array, start?: number, end?: number): string {
   const len = buff.length;
 
-  // eslint-disable-next-line no-param-reassign
   if (!start || start < 0) start = 0;
-  // eslint-disable-next-line no-param-reassign
   if (!end || end < 0 || end > len) end = len;
 
   let out = '';
@@ -87,7 +85,6 @@ export function bufToHexString(
   // undefined is handled specially as per ECMA-262 6th Edition,
   // Section 13.3.3.7 Runtime Semantics: KeyedBindingInitialization.
   if (start === undefined || start < 0) {
-    // eslint-disable-next-line no-param-reassign
     start = 0;
   }
   // Return early if start > this.length. Done here to prevent potential uint32
@@ -97,7 +94,6 @@ export function bufToHexString(
   }
 
   if (end === undefined || end > buffer.length) {
-    // eslint-disable-next-line no-param-reassign
     end = buffer.length;
   }
 
@@ -106,9 +102,7 @@ export function bufToHexString(
   }
 
   // Force coercion to uint32. This will also coerce false/NaN values to 0.
-  // eslint-disable-next-line no-param-reassign,no-bitwise
   end >>>= 0;
-  // eslint-disable-next-line no-param-reassign, no-bitwise
   start >>>= 0;
 
   if (end <= start) {
@@ -141,7 +135,6 @@ export function buf(
   }
 
   // This should return the most compact buffer version without leading zeros, so safe for RLP encodings.
-  // eslint-disable-next-line no-underscore-dangle
   if (b instanceof BigNumber || (b as any)?._isBigNumber === true)
     return hexToArrayBuffer((b as any).toHexString().slice(2));
 

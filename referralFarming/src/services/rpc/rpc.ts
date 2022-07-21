@@ -4,7 +4,6 @@ import { JsonRpcResponse } from './types';
 
 const ulid = monotonicFactory();
 
-// eslint-disable-next-line no-undef
 async function rpcReq<U = never>(
   url: string,
   opts: RequestInit,
