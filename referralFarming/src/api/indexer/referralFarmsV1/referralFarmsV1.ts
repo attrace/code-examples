@@ -8,7 +8,7 @@ import { EChainId } from 'config';
 import { indexer } from '../indexer';
 import { IFarmExistEventRes } from './types';
 import { parseFarmExistsEvents } from './parseEvents';
-import { IDiscoveryRes, resolveReferralFarmsV1Addr } from '../../discovery';
+import { IDiscoveryChainInfo, resolveReferralFarmsV1Addr } from 'api';
 
 const referralFarmsV1Events = [
   'event FarmDepositDecreaseClaimed(bytes32 indexed farmHash, uint128 delta)',
@@ -41,14 +41,16 @@ interface ITokenFilter {
  * @param creator creator address
  * @return parsed farmExistEvents
  */
-async function getFarmExistsEvents(
+async function fetchFarmExistsEvents(
   chainId: EChainId,
-  discoveryData: IDiscoveryRes,
+  discoveryChainData: IDiscoveryChainInfo,
   filter?: ITokenFilter,
   creator?: EvmAddress,
 ): Promise<IFarmExistEventRes | undefined> {
-  const { data, pop } = discoveryData;
-  const referralFarmsV1Addr = resolveReferralFarmsV1Addr(data, chainId);
+  const referralFarmsV1Addr = resolveReferralFarmsV1Addr(
+    discoveryChainData,
+    chainId,
+  );
 
   // Allow filtering by creator
   let topic2;
@@ -66,19 +68,14 @@ async function getFarmExistsEvents(
       address.expandBytes24ToBytes32(t),
     );
   }
-  const farmExistsEvents = await indexer.queryIndexer(
-    {
-      addresses: [referralFarmsV1Addr],
-      topic1: [eventIds.FarmExists],
-      topic2,
-      topic3,
-      topic4,
-      chainId: [chainId],
-    },
-    data.indexers,
-    data.airports,
-    pop,
-  );
+  const farmExistsEvents = await indexer.queryIndexer({
+    addresses: [referralFarmsV1Addr],
+    topic1: [eventIds.FarmExists],
+    topic2,
+    topic3,
+    topic4,
+    chainId: [chainId],
+  });
 
   if (farmExistsEvents?.items) {
     return parseFarmExistsEvents(farmExistsEvents.items, referralFarmsV1Iface);
@@ -86,5 +83,5 @@ async function getFarmExistsEvents(
 }
 
 export const referralFarmsV1 = {
-  getFarmExistsEvents,
+  fetchFarmExistsEvents,
 };

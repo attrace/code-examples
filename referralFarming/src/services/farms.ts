@@ -29,7 +29,7 @@ const farmExistsEventsToMap = (farmExistsEvents: IFarmExistEventRes) => {
  * @param farmExistsEvents should be filtered by one referred token
  * @returns timestamp when first farm was created (first farmExists event emitted)
  */
-export const getFarmCreatedTimestamp = async (
+export const fetchFarmCreatedTimestamp = async (
   farmExistsEvents: IFarmExistEventRes,
 ) => {
   const blockNumber = farmExistsEvents[0]?.blockNumber; //[0] - because first farmExists event emits when farm is created and all events sorted in desc order
@@ -43,7 +43,7 @@ export const getFarmCreatedTimestamp = async (
  * @param oracleUrl
  * @returns Map of rewards tokens for this referred token
  */
-export async function getDailyRewardsForFarms(
+export async function fetchDailyRewardsForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {
@@ -76,7 +76,7 @@ export async function getDailyRewardsForFarms(
  * @param oracleUrl
  * @returns Map where key is rewardToken and value is conversion rate(if it exists)<number> and sum of lastConfirmedRewards<bigint> for rewardToken
  */
-export async function getAPRDataForFarms(
+export async function fetchAPRDataForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<{ aprData: IDataForAPRMap; farmTokenSize: bigint }> {
@@ -153,7 +153,7 @@ export async function getAPRDataForFarms(
  * @param oracleUrl
  * @returns Map where key is rewardToken and value is sum of farmTrackedRewardValue for rewardToken<bigint>
  */
-export async function getRemainingRewardsForFarms(
+export async function fetchRemainingRewardsForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {

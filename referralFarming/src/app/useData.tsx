@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { farms } from 'services';
 
@@ -6,14 +6,14 @@ import {
   discovery,
   referralFarmsV1,
   fetchTokenList,
-  getOracleUrl,
+  resolveOracleUrl,
   IDiscoveryRes,
   TokenListMap,
+  IDiscoveryChainInfo,
 } from 'api';
 import { address, numbers } from 'utils';
-import { EChainId, getOracleChainId } from 'config';
+import { EChainId } from 'config';
 import { Address, ERC20Token } from 'types';
-import { IFullDiscovery } from 'api';
 
 const { calcApr, bigIntToNumber } = numbers;
 const { toChainAddressEthers, parseChainAddress } = address;
@@ -25,8 +25,8 @@ export const useData = () => {
   const [chainId, setChainId] = useState(EChainId.Rinkeby);
   const [tokensList, setTokensList] = useState<TokenListMap>(new Map());
   const [referTokenDetails, setReferTokenDetails] = useState<ERC20Token>();
-  const [discoveryData, setDiscoveryData] =
-    useState<IDiscoveryRes<IFullDiscovery>>();
+  const [discoveryChainData, setDiscoveryChainData] =
+    useState<IDiscoveryRes<IDiscoveryChainInfo>>();
   const [farmCreatedTimestamp, setFarmCreatedTimestamp] = useState<number>();
   const [dailyRewards, setDailyRewards] = useState<Array<any>>([]);
   const [remainingRewards, setRemainingRewards] = useState<Array<any>>([]);
@@ -36,14 +36,12 @@ export const useData = () => {
 
   useEffect(() => {
     const fetchDiscovery = async () => {
-      const discoveryRes = await discovery.getDiscovery<IFullDiscovery>(
-        'mainnet/full.json',
-      );
-      setDiscoveryData(discoveryRes);
+      const res = await discovery.fetchDiscoveryChain(chainId);
+      setDiscoveryChainData(res);
     };
 
     fetchDiscovery();
-  }, []);
+  }, [chainId]);
 
   useEffect(() => {
     if (chainId || referredToken) {
@@ -61,51 +59,42 @@ export const useData = () => {
   }, []);
 
   const fetchFarmCreatedTimestamp = useCallback(async () => {
-    if (!discoveryData || !referredToken) return;
+    if (!discoveryChainData?.data || !referredToken) return;
 
     const referredTokenChainAddress = toChainAddressEthers(
       chainId,
       referredToken,
     );
 
-    const data = await referralFarmsV1.getFarmExistsEvents(
+    const data = await referralFarmsV1.fetchFarmExistsEvents(
       chainId,
-      discoveryData,
+      discoveryChainData.data,
       { referredTokens: [referredTokenChainAddress] },
     );
-    const farmTimeCreated = data && (await farms.getFarmCreatedTimestamp(data));
+    const farmTimeCreated =
+      data && (await farms.fetchFarmCreatedTimestamp(data));
 
     farmTimeCreated && setFarmCreatedTimestamp(Number(farmTimeCreated));
-  }, [referredToken, chainId, discoveryData]);
-
-  const fetchTokensList = useCallback(async (chainId: EChainId) => {
-    const tokenList = await fetchTokenList(chainId);
-    if (tokenList?.size) {
-      setTokensList(tokenList);
-      return tokenList;
-    }
-  }, []);
+  }, [referredToken, chainId, discoveryChainData]);
 
   const fetchDailyRewards = useCallback(async () => {
-    if (!discoveryData || !referredToken) return;
+    if (!discoveryChainData?.data || !referredToken) return;
 
     const referredTokenChainAddress = address.toChainAddressEthers(
       chainId,
       referredToken,
     );
-    const farmExistsEvents = await referralFarmsV1.getFarmExistsEvents(
+    const farmExistsEvents = await referralFarmsV1.fetchFarmExistsEvents(
       chainId,
-      discoveryData,
+      discoveryChainData.data,
       { referredTokens: [referredTokenChainAddress] },
     );
 
     if (!farmExistsEvents?.length) return;
 
-    const oracleChainId = getOracleChainId(chainId);
-    // TODO: fetch oracle chains/chainID.json
-    const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
+    const oracleUrl = resolveOracleUrl(discoveryChainData.data);
 
-    const dailyRewardsMap = await farms.getDailyRewardsForFarms(
+    const dailyRewardsMap = await farms.fetchDailyRewardsForFarms(
       farmExistsEvents,
       oracleUrl,
     );
@@ -128,27 +117,26 @@ export const useData = () => {
 
       setDailyRewards(dailyRewardsWithTokenDetails);
     }
-  }, [referredToken, chainId, discoveryData]);
+  }, [referredToken, chainId, discoveryChainData]);
 
   const fetchRemainingRewards = useCallback(async () => {
-    if (!discoveryData || !referredToken) return;
+    if (!discoveryChainData?.data || !referredToken) return;
 
     const referredTokenChainAddress = address.toChainAddressEthers(
       chainId,
       referredToken,
     );
-    const farmExistsEvents = await referralFarmsV1.getFarmExistsEvents(
+    const farmExistsEvents = await referralFarmsV1.fetchFarmExistsEvents(
       chainId,
-      discoveryData,
+      discoveryChainData.data,
       { referredTokens: [referredTokenChainAddress] },
     );
 
     if (!farmExistsEvents?.length) return;
 
-    const oracleChainId = getOracleChainId(chainId);
-    const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
+    const oracleUrl = resolveOracleUrl(discoveryChainData.data);
 
-    const remainingRewardsMap = await farms.getRemainingRewardsForFarms(
+    const remainingRewardsMap = await farms.fetchRemainingRewardsForFarms(
       farmExistsEvents,
       oracleUrl,
     );
@@ -170,7 +158,71 @@ export const useData = () => {
 
       setRemainingRewards(remainingRewardsWithTokenDetails);
     }
-  }, [referredToken, chainId, discoveryData]);
+  }, [referredToken, chainId, discoveryChainData]);
+
+  const fetchAPRForReferredToken = useCallback(async () => {
+    if (!discoveryChainData?.data || !referredToken) return;
+
+    const referredTokenChainAddress = address.toChainAddressEthers(
+      chainId,
+      referredToken,
+    );
+    const farmExistsEvents = await referralFarmsV1.fetchFarmExistsEvents(
+      chainId,
+      discoveryChainData.data,
+      {
+        referredTokens: [referredTokenChainAddress],
+      },
+    );
+    if (!farmExistsEvents?.length) return;
+
+    const oracleUrl = resolveOracleUrl(discoveryChainData.data);
+    const { aprData, farmTokenSize } = await farms.fetchAPRDataForFarms(
+      farmExistsEvents,
+      oracleUrl,
+    );
+
+    const newApr: { rewardTokenSymbol: string; apr: string }[] = [];
+
+    if (aprData.size) {
+      for (const [
+        rewardToken,
+        { lastConfirmedReward, conversionRate },
+      ] of aprData.entries()) {
+        const { address } = parseChainAddress(rewardToken);
+        const rewardTokenDetails = await fetchTokenDetails(address);
+
+        const dailyRewardsNumber = bigIntToNumber(
+          lastConfirmedReward.toString(),
+          referTokenDetails?.decimals,
+        );
+        const farmTokenSizeNumber = bigIntToNumber(
+          farmTokenSize.toString(),
+          rewardTokenDetails?.decimals,
+        );
+
+        const apr = calcApr(
+          farmTokenSizeNumber,
+          dailyRewardsNumber * conversionRate,
+        );
+
+        newApr.push({
+          rewardTokenSymbol: rewardTokenDetails?.symbol || '',
+          apr,
+        });
+
+        setAprPerRewardToken(newApr);
+      }
+    }
+  }, [referredToken, chainId, discoveryChainData]);
+
+  const fetchTokensList = useCallback(async (chainId: EChainId) => {
+    const tokenList = await fetchTokenList(chainId);
+    if (tokenList?.size) {
+      setTokensList(tokenList);
+      return tokenList;
+    }
+  }, []);
 
   const fetchTokenDetails = useCallback(
     async (token: Address) => {
@@ -201,77 +253,6 @@ export const useData = () => {
     }
   }, [referredToken, fetchTokenDetails]);
 
-  const fetchAPRForReferredToken = useCallback(async () => {
-    if (!discoveryData) return;
-
-    if (referredToken) {
-      const farmExistsEvents = await referralFarmsV1.getFarmExistsEvents(
-        chainId,
-        discoveryData,
-        {
-          referredTokens: [
-            address.toChainAddressEthers(chainId, referredToken),
-          ],
-        },
-      );
-
-      if (farmExistsEvents?.length) {
-        const oracleChainId = getOracleChainId(chainId);
-        const oracleUrl = getOracleUrl(discoveryData.data, oracleChainId);
-
-        const { aprData, farmTokenSize } = await farms.getAPRDataForFarms(
-          farmExistsEvents,
-          oracleUrl,
-        );
-
-        const newApr: { rewardTokenSymbol: string; apr: string }[] = [];
-
-        if (aprData.size) {
-          for (const [
-            rewardToken,
-            { lastConfirmedReward, conversionRate },
-          ] of aprData.entries()) {
-            const { address } = parseChainAddress(rewardToken);
-            const rewardTokenDetails = await fetchTokenDetails(address);
-
-            const dailyRewardsNumber = bigIntToNumber(
-              lastConfirmedReward.toString(),
-              referTokenDetails?.decimals,
-            );
-            const farmTokenSizeNumber = bigIntToNumber(
-              farmTokenSize.toString(),
-              rewardTokenDetails?.decimals,
-            );
-
-            const apr = calcApr(
-              farmTokenSizeNumber,
-              dailyRewardsNumber * conversionRate,
-            );
-
-            newApr.push({
-              rewardTokenSymbol: rewardTokenDetails?.symbol || '',
-              apr,
-            });
-
-            setAprPerRewardToken(newApr);
-          }
-        }
-      }
-    }
-  }, [referredToken, chainId, discoveryData]);
-
-  const details = useMemo(() => {
-    if (!referTokenDetails) return [];
-
-    const details = [];
-
-    for (const [k, v] of Object.entries(referTokenDetails)) {
-      details.push({ k, v });
-    }
-
-    return details;
-  }, [referTokenDetails]);
-
   return {
     chainId,
     setChainId,
@@ -286,6 +267,6 @@ export const useData = () => {
     fetchDailyRewards,
     fetchRemainingRewards,
     fetchAPRForReferredToken,
-    referTokenDetails: details,
+    referTokenDetails,
   };
 };

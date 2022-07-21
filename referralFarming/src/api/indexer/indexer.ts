@@ -1,4 +1,3 @@
-import { TAirport, TNode } from 'api/discovery';
 import { IEventLog } from 'types';
 
 import { ILogParams } from './types';
@@ -24,15 +23,8 @@ const indexerUrl = 'https://indexer.attrace.com';
 
 async function queryIndexer(
   searchParams: ILogParams,
-  indexers: TNode[],
-  airports: TAirport[],
-  pop: string,
 ): Promise<{ items: IEventLog[] } | undefined> {
   try {
-    if (!indexers.length || !airports.length || !pop) {
-      throw Error('Wrong indexer node search params');
-    }
-
     const urlPath = makeIndexerUrlPath(searchParams);
 
     const response = await (await fetch(indexerUrl + urlPath)).json();

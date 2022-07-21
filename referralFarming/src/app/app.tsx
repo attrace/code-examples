@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 
 import { useData } from './useData';
 
@@ -23,6 +23,14 @@ const App: FC = () => {
     fetchAPRForReferredToken,
     referTokenDetails,
   } = useData();
+
+  const referTokenDetailsArr = useMemo(() => {
+    if (!referTokenDetails) return [];
+
+    return Object.entries(referTokenDetails).map(([k, v]) => {
+      return { k, v };
+    });
+  }, [referTokenDetails]);
 
   return (
     <div className={styles.app}>
@@ -55,11 +63,11 @@ const App: FC = () => {
       <div>
         <h2>Results:</h2>
 
-        {!!referTokenDetails.length && (
+        {!!referTokenDetailsArr.length && (
           <>
             <h4>Referred Token Details:</h4>
             <div className={styles.resultContent}>
-              {referTokenDetails.map(({ k, v }) => (
+              {referTokenDetailsArr.map(({ k, v }) => (
                 <div key={k}>
                   {k} - {v}
                 </div>

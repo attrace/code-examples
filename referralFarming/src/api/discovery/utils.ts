@@ -1,27 +1,30 @@
-import { EChainId, EOracleChainId } from 'config';
+import { EChainId } from 'config';
 
-import { IDiscovery, TNodeUrl } from './index';
+import { IDiscoveryChainInfo, TNodeUrl } from './index';
 
 /**
  *
  * @param discovery Data from discovery service
  * @param chainId Network ChaindId(Rinkeby, Ethereum mainnet etc.)
- * @return return ReferralFarmsV1 oracle address from discovery
+ * @return return ReferralFarmsV1 address from discovery
  */
 export const resolveReferralFarmsV1Addr = (
-  discovery: IDiscovery,
+  discovery: IDiscoveryChainInfo,
   chainId: EChainId,
 ) =>
-  discovery?.farmOracles?.referralFarmsV1.find((e) => e.chainId === chainId)
-    ?.address || '';
+  discovery.chainInfo.referralFarmsV1.find(
+    (e) => e.chainId === chainId.toString(),
+  )?.address || '';
 
-export const getOracleUrl = (
-  discovery: IDiscovery,
-  oracleChainId: EOracleChainId,
-): TNodeUrl => {
+/**
+ *
+ * @param discovery Data from discovery service
+ * @return return oracle url from discovery
+ */
+export const resolveOracleUrl = (discovery: IDiscoveryChainInfo): TNodeUrl => {
+  const oracleChainId = discovery.chainInfo.chainId;
   return (
-    discovery.farmOracles.oracles.find(
-      (e) => e.chainId === Number(oracleChainId),
-    )?.url || ''
+    discovery.chainInfo.oracles.find((e) => e.chainId === oracleChainId)?.url ||
+    ''
   );
 };

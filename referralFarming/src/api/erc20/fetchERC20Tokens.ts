@@ -1,6 +1,6 @@
 import groupBy from 'lodash/groupBy';
 
-import { discovery, TTokenList } from 'api';
+import { discovery, IDiscoveryTokenList } from 'api';
 import { Address, ERC20Token } from 'types';
 import { EChainId } from '../../config';
 
@@ -13,7 +13,7 @@ async function fetchTokenListUrls(
   chainId: EChainId,
 ): Promise<string[] | undefined> {
   try {
-    const { data } = await discovery.getDiscovery<TTokenList>(
+    const { data } = await discovery.fetchDiscovery<IDiscoveryTokenList>(
       'tokenLists.json',
     );
 
