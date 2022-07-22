@@ -1,4 +1,4 @@
-import BigNumber from 'bignumber.js';
+import BigNumberJS from 'bignumber.js';
 import type { PrefixedHexString } from 'ethereumjs-util';
 
 import type { HexTypes, BigIntTypes, Bytes } from './types';
@@ -112,17 +112,28 @@ export function bufToHexString(
   return hexSlice(buffer, start, end);
 }
 
+function bnJsToHex(b: BigNumberJS) : string {
+  return toEvenLength(b.toString(16));
+}
+
 export function buf(
-  b: Bytes | Uint8Array | HexTypes | number | BigIntTypes | BigNumber,
+  b: Bytes | Uint8Array | HexTypes | number | BigIntTypes | BigNumberJS,
 ): Uint8Array {
   if (b === null || b instanceof Uint8Array) return b;
 
   if (typeof b === 'number') {
-    return hexToArrayBuffer(new BigNumber(b).toString(16).slice(2));
+    if(b < 0) {
+      throw new Error('- unsupported');
+    }
+    return hexToArrayBuffer(bnJsToHex(new BigNumberJS(b)));
   }
 
-  if (typeof b === 'bigint')
+  if (typeof b === 'bigint'){
+    if(b < 0n) {
+      throw new Error('- unsupported');
+    }
     return hexToArrayBuffer(toEvenLength(b.toString(16)));
+  }
 
   if (typeof b === 'string') {
     if (!b.startsWith('0x')) throw new Error('unsupported');
@@ -135,20 +146,25 @@ export function buf(
   }
 
   // This should return the most compact buffer version without leading zeros, so safe for RLP encodings.
-  if (b instanceof BigNumber || (b as any)?._isBigNumber === true)
-    return hexToArrayBuffer((b as any).toHexString().slice(2));
+  if(BigNumberJS.isBigNumber(b)) {
+    if(b.lt(0)) {
+      throw new Error('- unsupported');
+    }
+    return hexToArrayBuffer(bnJsToHex(b));
+  }
 
   throw new Error('unsupported: ');
 }
 export function toBigInt(
-  b: BigIntTypes | Uint8Array | HexTypes | number | BigNumber,
+  b: BigIntTypes | Uint8Array | HexTypes | number | BigNumberJS,
 ): bigint {
   if (typeof b === 'bigint') return b;
   if (typeof b === 'number') return BigInt(b);
-  if (b instanceof Uint8Array) return toBigInt(buf(b));
+  if (b instanceof Uint8Array) return BigInt(toHex(b));
   if (typeof b === 'string' && b.startsWith('0x')) return BigInt(b);
-  if (b instanceof BigNumber || (b as any)?._isBigNumber === true)
-    return BigInt(b.toString());
+  if(BigNumberJS.isBigNumber(b)) {
+    return BigInt('0x'+bnJsToHex(b));
+  }
 
   throw new Error('unsupported');
 }
