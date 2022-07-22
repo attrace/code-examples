@@ -50,12 +50,12 @@ export async function getDailyRewardsForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {
-  try {
-    const rewardsPerRewardTokenMap = new Map<ChainAddress, bigint>();
+  const rewardsPerRewardTokenMap = new Map<ChainAddress, bigint>();
 
-    const uniqueFarmExistMap = farmExistsEventsToMap(farmExistsEvents);
+  const uniqueFarmExistMap = farmExistsEventsToMap(farmExistsEvents);
 
-    return new Promise(async (resolve) => {
+  return new Promise(async (resolve, reject) => {
+    try {
       for (const v of uniqueFarmExistMap.values()) {
         const { farmHash, rewardTokenDefn } = v;
         const lastConfirmedReward = await oracle.fetchLastConfirmationReward(
@@ -71,11 +71,10 @@ export async function getDailyRewardsForFarms(
       }
 
       resolve(rewardsPerRewardTokenMap);
-    });
-  } catch (error) {
-    console.log(error);
-    return Promise.reject(error);
-  }
+    } catch(err) {
+      reject(err);
+    }
+  });
 }
 
 /**
@@ -88,15 +87,15 @@ export async function getRemainingRewardsForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<Map<ChainAddress, bigint>> {
-  try {
-    const rewardsPerRewardTokenMap = new Map<ChainAddress, bigint>();
+  const rewardsPerRewardTokenMap = new Map<ChainAddress, bigint>();
 
-    const uniqueFarmExistMap = new Map<FarmHash, IFarmExistsEvent>();
-    farmExistsEvents.forEach((farmExists) => {
-      uniqueFarmExistMap.set(farmExists.farmHash, farmExists);
-    });
+  const uniqueFarmExistMap = new Map<FarmHash, IFarmExistsEvent>();
+  farmExistsEvents.forEach((farmExists) => {
+    uniqueFarmExistMap.set(farmExists.farmHash, farmExists);
+  });
 
-    return new Promise(async (resolve) => {
+  return new Promise(async (resolve, reject) => {
+    try {
       for (const v of uniqueFarmExistMap.values()) {
         const { farmHash, rewardTokenDefn } = v;
         const farmsTrackedRewardsValue =
@@ -110,11 +109,10 @@ export async function getRemainingRewardsForFarms(
       }
 
       resolve(rewardsPerRewardTokenMap);
-    });
-  } catch (error) {
-    console.log(error);
-    return Promise.reject(error);
-  }
+    } catch(err) {
+      reject(err);
+    }
+  });
 }
 
 /**
@@ -127,28 +125,28 @@ export async function getAPRDataForFarms(
   farmExistsEvents: IFarmExistEventRes,
   oracleUrl: TNodeUrl,
 ): Promise<{ aprData: IDataForAPRMap; farmTokenSize: bigint }> {
-  try {
-    const APRMap: IDataForAPRMap = new Map();
+  const APRMap: IDataForAPRMap = new Map();
 
-    const uniqueTokenDefns = new Set<string>();
+  const uniqueTokenDefns = new Set<string>();
 
-    const uniqueFarmExistMap = farmExistsEventsToMap(farmExistsEvents);
+  const uniqueFarmExistMap = farmExistsEventsToMap(farmExistsEvents);
 
-    uniqueFarmExistMap.forEach(({ referredTokenDefn, rewardTokenDefn }) => {
-      uniqueTokenDefns.add(parseChainAddress(referredTokenDefn).address);
-      uniqueTokenDefns.add(parseChainAddress(rewardTokenDefn).address);
-    });
+  uniqueFarmExistMap.forEach(({ referredTokenDefn, rewardTokenDefn }) => {
+    uniqueTokenDefns.add(parseChainAddress(referredTokenDefn).address);
+    uniqueTokenDefns.add(parseChainAddress(rewardTokenDefn).address);
+  });
 
-    const arr = Array.from(uniqueTokenDefns);
+  const arr = Array.from(uniqueTokenDefns);
 
-    const exchangeRates = await coingecko.fetchConversationRateToEth(arr);
+  const exchangeRates = await coingecko.fetchConversationRateToEth(arr);
 
-    const { size } = uniqueFarmExistMap;
-    let idx = 0;
+  const { size } = uniqueFarmExistMap;
+  let idx = 0;
 
-    let totalFarmTokenSize = 0n;
+  let totalFarmTokenSize = 0n;
 
-    return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    try {
       uniqueFarmExistMap.forEach((farmExistEvent, key) => {
         const { rewardTokenDefn, referredTokenDefn } = farmExistEvent;
 
@@ -187,9 +185,8 @@ export async function getAPRDataForFarms(
           }
         });
       });
-    });
-  } catch (error) {
-    console.log(error);
-    return Promise.reject(error);
-  }
+    } catch(err) {
+      reject(err)
+    }
+  });
 }
