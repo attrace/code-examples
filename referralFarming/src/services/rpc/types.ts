@@ -1,7 +1,7 @@
 export type JsonRpcRequestId = number | string;
 export type JsonRpcResponseId = JsonRpcRequestId | null;
 
-export interface JsonRPCError extends Error {
+export interface JsonRPCError {
   code: number; // Json Rpc compatible code
   message: string;
   data?: unknown;

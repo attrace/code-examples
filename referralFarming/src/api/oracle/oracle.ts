@@ -1,10 +1,12 @@
 import { Interface } from '@ethersproject/abi';
+import { BigNumber } from '@ethersproject/bignumber';
 
 import { rpc, RpcOracleMethod, RpcRoute } from 'services';
 import { ChainAddress, FarmHash } from 'types';
 import { TNodeUrl } from '../discovery';
 
 import { buffer, address } from 'utils';
+import { jsonErrorToError } from 'utils/rpc';
 
 const ifaceReferralFarmsV1Reactor = new Interface([
   'function getLastConfirmationReward(bytes32 farmHash) view returns (uint128)',
@@ -36,9 +38,12 @@ export async function fetchLastConfirmationReward(
     ],
   );
 
-  if (res?.result) return BigInt(res?.result);
-
-  return Promise.reject(new Error(res?.error?.message));
+  if (res?.result) {
+    const [decoded] = ifaceReferralFarmsV1Reactor.decodeFunctionResult('getLastConfirmationReward', res.result);
+    return (decoded as BigNumber).toBigInt(); 
+  }
+  
+  throw jsonErrorToError(res?.error);
 }
 
 /**
@@ -64,9 +69,13 @@ export async function fetchFarmsTrackedRewardsValue(
       },
     ],
   );
-  if (res?.result) return BigInt(res?.result);
 
-  return Promise.reject(new Error(res?.error?.message));
+  if (res?.result) {
+    const [decoded] = ifaceReferralFarmsV1Reactor.decodeFunctionResult('getFarmTrackedRewardValue', res.result);
+    return (decoded as BigNumber).toBigInt(); 
+  }
+
+  throw jsonErrorToError(res?.error);
 }
 
 const ifaceFarmTokenSizeV1Reactor = new Interface([
@@ -100,7 +109,10 @@ export async function fetchFarmTokenSize(
     ],
   );
 
-  if (res?.result) return BigInt(res?.result);
+  if (res?.result) {
+    const [decoded] = ifaceFarmTokenSizeV1Reactor.decodeFunctionResult('getFarmTokenSize', res.result);
+    return (decoded as BigNumber).toBigInt(); 
+  }
 
-  return Promise.reject(new Error(res?.error?.message));
+  throw jsonErrorToError(res?.error);
 }
