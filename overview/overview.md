@@ -15,24 +15,15 @@ Oracles are fully reactive to state/event changes on Ethereum, there is no extra
 Oracles expose a JSON-RPC interface similar to infura and others.
 Querying the oracles to state/events can be done using normal ethereum tooling like ethers.
 
-Overview:
+Overview:   
 ![oracles.png](./oracles.png)
 
-## Important data types
+## Useful to know
 
-### Chain Address
+### Oracle chain id
+Mainnet ethereum has chain id `1`, rinkeby ethereum testnet chain id `4`. 
 
-Chain address is a normal 20-byte ethereum address with with 4 leading bytes that encode a chainid into it.
-
-Example for a normal evm address:
-```
-0xc1f04af99fc53dd3b74615ab47d8825eb98b7943
-```
-
-Chain Address for chain id 1 (eth-mainnet), hex-encoded `0x00000001`
-```
-0x00000001c1f04af99fc53dd3b74615ab47d8825eb98b7943
-```
+The oracles internally build a deterministic side-chain following the rules decided by the Attrace DAO, this chain id is `137` for mainnets and `4470` for testnets.
 
 ### Farms
 
@@ -48,10 +39,19 @@ function toFarmHash(address sponsor, bytes24 rewardTokenDefn, bytes24 referredTo
 }
 ```
 
-### Oracle chain id
-Mainnet ethereum has chain id `1`, rinkeby ethereum testnet chain id `4`. 
+### Chain Address structure
 
-The oracles internally build a deterministic side-chain following the rules decided by the Attrace DAO, this chain id is `137` for mainnets and `4470` for testnets.
+Chain address is a 24-byte value that encodes into it a 4-byte chain id and a normal 20-byte ethereum address.
+
+Example for a normal evm address:
+```
+0xc1f04af99fc53dd3b74615ab47d8825eb98b7943
+```
+
+Chain Address for chain id 1 (eth-mainnet), hex-encoded `0x00000001`
+```
+0x00000001c1f04af99fc53dd3b74615ab47d8825eb98b7943
+```
 
 ## Referral Farms V1 (Ethereum contract)
 
@@ -93,8 +93,8 @@ event RewardsHarvested(address indexed caller, bytes24 indexed rewardTokenDefn, 
 
 Contract addresses for Referral Farms V1:
 ```
--  eth-mainnet (1): 0xc1f04af99fc53dd3b74615ab47d8825eb98b7943
--  eth-rinkeby (4): 0x0c050289cbd8e3c9dcd084c5769732c2cedbb9e9
+eth-mainnet (1): 0xc1f04af99fc53dd3b74615ab47d8825eb98b7943
+eth-rinkeby (4): 0x0c050289cbd8e3c9dcd084c5769732c2cedbb9e9
 ```
 
 
