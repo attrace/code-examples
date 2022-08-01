@@ -55,8 +55,8 @@ async function fetchERC20Tokens(urls: string[]): Promise<ERC20Token[]> {
 export type TokenListMap = Map<Address, ERC20Token>;
 
 /**
- * Fetches tokensList depends on selected chainId(Mainned or Rinkeby) from Mask and discovery(Attrace) services(see tokenList.json).
- * @param chainId Network ID(Rinkeby, Ethereum mainnet etc.)
+ * Fetches tokensList depends on selected chainId(Mainned or Goerli) from Mask and discovery(Attrace) services(see tokenList.json).
+ * @param chainId Network ID(Goerli, Ethereum mainnet etc.)
  * @return Map where key is tokenAddress and value is ERC20Token
  */
 export async function fetchTokenList(

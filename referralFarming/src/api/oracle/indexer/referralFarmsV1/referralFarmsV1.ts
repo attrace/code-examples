@@ -4,6 +4,7 @@ import { keccak256 } from 'web3-utils';
 import { address } from 'utils';
 import { ChainAddress, EvmAddress } from 'types';
 import { EChainId } from 'config';
+import { resolveOracleUrl } from 'api';
 
 import { indexer } from '../indexer';
 import { IFarmExistEventRes } from './types';
@@ -35,7 +36,7 @@ interface ITokenFilter {
 
 /**
  * fetching blockchain logs from indexer
- * @param chainId Network ChainId(Rinkeby, Ethereum mainnet etc.)
+ * @param chainId Network ChainId(Goerli, Ethereum mainnet etc.)
  * @param discoveryData data from discovery service
  * @param filter reward/referred token arrays
  * @param creator creator address
@@ -51,6 +52,7 @@ async function fetchFarmExistsEvents(
     discoveryChainData,
     chainId,
   );
+  const oracleUrl = resolveOracleUrl(discoveryChainData);
 
   // Allow filtering by creator
   let topic2;
@@ -68,7 +70,7 @@ async function fetchFarmExistsEvents(
       address.expandBytes24ToBytes32(t),
     );
   }
-  const farmExistsEvents = await indexer.queryIndexer({
+  const farmExistsEvents = await indexer.queryIndexer(oracleUrl, {
     addresses: [referralFarmsV1Addr],
     topic1: [eventIds.FarmExists],
     topic2,

@@ -1,8 +1,27 @@
 import { IEventLog } from 'types';
 
-import { ILogParams } from './types';
+import { Bytes32, EvmAddress } from 'types';
 
-function makeIndexerUrlPath(params: ILogParams): string {
+interface ILogParams {
+  // Logs from these addresses only
+  addresses?: EvmAddress[];
+  // Search across all topics
+  topics?: Bytes32[];
+  // Topic1 is commonly the event id
+  topic1?: Bytes32[];
+  // Topics 2-4 are the 1-3 indexed event params
+  topic2?: Bytes32[];
+  topic3?: Bytes32[];
+  topic4?: Bytes32[];
+  // Logs from these chains only
+  chainId?: number[];
+  // Logs from these transactions only
+  transactionHash?: Bytes32[];
+  // Default AND search is done by the indexers
+  strategy?: 'AND' | 'OR';
+}
+
+function makeUrlPath(params: ILogParams): string {
   const parts = [];
   if (params.addresses)
     params.addresses.forEach((d) => parts.push(`address=${d}`));
@@ -19,19 +38,14 @@ function makeIndexerUrlPath(params: ILogParams): string {
   return `/v1/logsearch?${parts.join('&')}`;
 }
 
-const indexerUrl = 'https://indexer.attrace.com';
-
 async function queryIndexer(
+  oracleUrl: string,
   searchParams: ILogParams,
 ): Promise<{ items: IEventLog[] } | undefined> {
   try {
-    const urlPath = makeIndexerUrlPath(searchParams);
+    const urlPath = makeUrlPath(searchParams);
 
-    const response = await (await fetch(indexerUrl + urlPath)).json();
-
-    if (!response) {
-      throw new Error('Indexer response empty');
-    }
+    const response = await (await fetch(oracleUrl + urlPath)).json();
 
     return response;
   } catch (e) {
