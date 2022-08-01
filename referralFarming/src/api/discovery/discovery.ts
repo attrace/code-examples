@@ -6,7 +6,7 @@ const discoveryUrl = 'https://discovery.attrace.com';
 type TDiscoveryFile =
   | 'tokenLists.json'
   | 'chains.json'
-  | 'chains/4470.json'
+  | 'chains/5470.json'
   | 'chains/147.json';
 
 /**
@@ -32,7 +32,7 @@ export async function fetchDiscovery<T>(
 
 /**
  *
- * @param chainId 1 for Mainnet, 4 for Rinkeby
+ * @param chainId 1 for Mainnet, 5 for Goerli
  * @returns JSON contains oracleChainId, pacemaker chainId, authority, referralFarmsV1, confirmationsV1 addresses and oracle nodes.
  */
 export async function fetchDiscoveryChain(

@@ -5,7 +5,7 @@ import { IDiscoveryChainInfo, TNodeUrl } from './index';
 /**
  *
  * @param discovery Data from discovery service
- * @param chainId Network ChaindId(Rinkeby, Ethereum mainnet etc.)
+ * @param chainId Network ChaindId(Goerli, Ethereum mainnet etc.)
  * @return return ReferralFarmsV1 address from discovery
  */
 export const resolveReferralFarmsV1Addr = (

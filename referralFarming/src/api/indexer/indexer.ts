@@ -2,7 +2,7 @@ import { IEventLog } from 'types';
 
 import { ILogParams } from './types';
 
-function makeIndexerUrlPath(params: ILogParams): string {
+function makeUrlPath(params: ILogParams): string {
   const parts = [];
   if (params.addresses)
     params.addresses.forEach((d) => parts.push(`address=${d}`));
@@ -19,15 +19,14 @@ function makeIndexerUrlPath(params: ILogParams): string {
   return `/v1/logsearch?${parts.join('&')}`;
 }
 
-const indexerUrl = 'https://indexer.attrace.com';
-
 async function queryIndexer(
+  host: string,
   searchParams: ILogParams,
 ): Promise<{ items: IEventLog[] } | undefined> {
   try {
-    const urlPath = makeIndexerUrlPath(searchParams);
+    const urlPath = makeUrlPath(searchParams);
 
-    const response = await (await fetch(indexerUrl + urlPath)).json();
+    const response = await (await fetch(host + urlPath)).json();
 
     if (!response) {
       throw new Error('Indexer response empty');

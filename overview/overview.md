@@ -21,9 +21,9 @@ Overview:
 ## Useful to know
 
 ### Oracle chain id
-Mainnet ethereum has chain id `1`, rinkeby ethereum testnet chain id `4`. 
+Mainnet ethereum has chain id `1`, goerli testnet chain id `5`. 
 
-The oracles internally build a deterministic side-chain following the rules decided by the Attrace DAO, this chain id is `137` for mainnets and `4470` for testnets.
+The oracles internally build a deterministic side-chain following the rules decided by the Attrace DAO, this chain id is `137` for mainnets and `5470` for testnets.
 
 ### Farms
 
@@ -94,7 +94,7 @@ event RewardsHarvested(address indexed caller, bytes24 indexed rewardTokenDefn, 
 Contract addresses for Referral Farms V1:
 ```
 eth-mainnet (1): 0xc1f04af99fc53dd3b74615ab47d8825eb98b7943
-eth-rinkeby (4): 0x0c050289cbd8e3c9dcd084c5769732c2cedbb9e9
+eth-goerli (5): 0x1e1885389b229b036460e2191fbdf0290Bd2baE9
 ```
 
 

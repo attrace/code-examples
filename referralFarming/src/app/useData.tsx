@@ -18,11 +18,11 @@ import { Address, ERC20Token } from 'types';
 const { calcApr, bigIntToNumber } = numbers;
 const { toChainAddressEthers, parseChainAddress } = address;
 
-const HARDCODED_TOKEN = '0xc778417e063141139fce010982780140aa0cd5ab';
+const HARDCODED_TOKEN = '0x926362b451a012f72b34240f36c3bdc163d462e0';
 
 export const useData = () => {
   const [referredToken, setReferredToken] = useState(HARDCODED_TOKEN);
-  const [chainId, setChainId] = useState(EChainId.Rinkeby);
+  const [chainId, setChainId] = useState(EChainId.Goerli);
   const [tokensList, setTokensList] = useState<TokenListMap>(new Map());
   const [referTokenDetails, setReferTokenDetails] = useState<ERC20Token>();
   const [discoveryChainData, setDiscoveryChainData] =

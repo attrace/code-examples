@@ -36,7 +36,7 @@ export interface IDiscoveryChainInfo {
   chainInfo: {
     chainId: EOracleChainId;
     authority: TContract;
-    pacemaker: string; // network chainId ("1" for mainnet, "4" for rinkeby)
+    pacemaker: string; // network chainId ("1" for mainnet, "5" for goerli)
     referralFarmsV1: TContract[];
     confirmationsV1: TContract[];
     oracles: TOracle[];

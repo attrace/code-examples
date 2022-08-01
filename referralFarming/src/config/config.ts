@@ -1,15 +1,15 @@
 export enum EChainId {
   'Mainnet' = 1,
-  'Rinkeby' = 4,
+  'Goerli' = 5,
 }
 export enum EOracleChainId {
   'mainnet' = 147,
-  'testnet' = 4470,
+  'testnet' = 5470,
 }
 
 const OracleChainId = {
   [EChainId.Mainnet]: EOracleChainId.mainnet,
-  [EChainId.Rinkeby]: EOracleChainId.testnet,
+  [EChainId.Goerli]: EOracleChainId.testnet,
 };
 export const resolveOracleChainIdByNetwork = (
   chainId: EChainId,
