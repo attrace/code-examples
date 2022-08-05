@@ -70,10 +70,9 @@ class AttraceQuery {
     return {};
   }
 
-  async getFarms(referredTokenHex: string) : FarmInfo[] {
+  async getFarms(referredTokenHex: string) : Promise<FarmInfo[]> {
     if(referredTokenHex == null || referredTokenHex.substring(0, 2) !== '0x') throw new Error('invalid input: '+referredTokenHex);
     const erc20chop = referredTokenHex.substring(2).toLowerCase();
-    const chainAddressMainnet = `0x${this.chainAddressPrefix}${erc20chop}`;
     const tokenb32 = `0x${this.chainAddressPrefix}${erc20chop}0000000000000000`;
     const farmExistsId = '0x46401a1ea83c45ef34b64281c8161df97eaf1b1b25ed2a5866c7dc6a1503150f';
     const req = await fetch(`${this.oracleUrl}/v1/logsearch?chainId=${this.chainId}&topic1=${farmExistsId}&topic3=${tokenb32}`);
@@ -207,7 +206,7 @@ interface ExchangeRate {
   [key: string]: { eth: number };
 }
 
-async function fetchConversationRateToEth(tokens: Address[] ): Promise<ExchangeRate> {
+async function fetchConversationRateToEth(tokens: string[] ): Promise<ExchangeRate> {
   const url = `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${tokens.join(',')}&vs_currencies=eth`;
   return await (await fetch(url)).json() as ExchangeRate;
 }
