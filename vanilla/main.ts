@@ -2,6 +2,8 @@ import { BigNumber } from '@ethersproject/bignumber';
 
 // -- EXAMPLE FETCHING DATA FOR 1 TOKEN
 
+const RPC_PROVIDER_URL = '<Provide your rpc provider. E.g: https://mainnet.infura.io/v3/<key>>';
+
 async function main() {
   const chainId = 1; // mainnet eth: 1, goerli: 5
   
@@ -30,6 +32,8 @@ async function main() {
     console.log(`daily reward for reward token: ${rewardToken}: ${value.toString()}`)
   }
 
+  const decimals = await getErc20Decimals(token);
+  console.log('decimals', decimals);
   // Collect APR data for a referred token
   // TODO
   // debugger;
@@ -192,6 +196,28 @@ class AttraceQuery {
 async function valueToNumber(erc20Hex: string, value: BigNumber) : Promise<number> {
   // TODO fetch decimals from infura using rpc_call
   // convert to decimal number
+}
+
+async function getErc20Decimals(erc20Hex: string) : Promise<number> {
+  const res = await fetch(RPC_PROVIDER_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: new Date().getTime().toString(),
+      method: 'eth_call',
+      params: [
+        {
+          to: erc20Hex, // Contract address
+          data: "0x313ce567" // hash of decimal() functions
+        },
+        "latest"
+      ]
+    })
+  });
+
+  const jsonRes = await res.json();
+  const decimals = BigNumber.from(jsonRes.result).toNumber();
+  return decimals
 }
 
 interface FarmInfo {
