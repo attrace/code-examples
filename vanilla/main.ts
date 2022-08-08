@@ -28,6 +28,15 @@ async function main() {
   const firstFarmTime = await q.getReferredTokenFirstFarmTime(token);
   console.log('first farm time: ', new Date(firstFarmTime*1000));
 
+  // Collect APR data for a referred token, by different reward token
+  const { rewardTokens, decimals, rates } = await q.getReferredTokenAPRByRewardToken(token);
+  if(rewardTokens == null || Object.keys(rewardTokens).length == 0) {
+    console.log('No more active farms');
+  }
+  for(let [rewardToken, { apr, totalReferredValue, totalRewardValue, totalRemainingRewardValue, farms }] of Object.entries(rewardTokens)) {
+    console.log(`Current APR for ${rewardToken} is ${formatAPR(apr, totalReferredValue)} with ${tokenValueToNumber(totalRemainingRewardValue, decimals[rewardToken])} reward token left`);
+  }
+
   // Get remaining value, by different reward token
   const remaining = await q.getReferredTokenRemainingValue(token);
   for(let [rewardToken, value] of Object.entries(remaining)) {
@@ -38,15 +47,6 @@ async function main() {
   const dailyRewards = await q.getReferredTokenDailyRewards(token);
   for(let [rewardToken, value] of Object.entries(dailyRewards)) {
     console.log(`daily reward for reward token: ${rewardToken}: ${value.toString()}`)
-  }
-
-  // Collect APR data for a referred token
-  const { rewardTokens, decimals, rates } = await q.getReferredTokenAPRByRewardToken(token);
-  if(rewardTokens == null || Object.keys(rewardTokens).length == 0) {
-    console.log('No more active farms');
-  }
-  for(let [rewardToken, { apr, totalReferredValue, totalRewardValue, totalRemainingRewardValue, farms }] of Object.entries(rewardTokens)) {
-    console.log(`Current APR for ${rewardToken} is ${formatAPR(apr, totalReferredValue)} with ${tokenValueToNumber(totalRemainingRewardValue, decimals[rewardToken])} reward token left`);
   }
 
   // debugger;

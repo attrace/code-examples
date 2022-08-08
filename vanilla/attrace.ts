@@ -233,14 +233,11 @@ export class AttraceQuery {
     const rows: Record<string, BigNumber> = {};
 
     // Hit RPC call for all and sum by reward token
-    const results = await Promise.all(farms.map(async f => {
-      const res = await this.oracleCall(
-        '0x3e5d7f8ec7f45204e8b0ecc852e29b1b51cf3965', // rfReactor 
-        `0x72a1880e${f.farmHash.substring(2)}` // hash get tracked val(farm)
-      );
-
-      return BigNumber.from(res);
-    }));
+    const results = await Promise.all(
+      farms.map(
+        f => this.getFarmRemainingTrackedRewardValue(f.farmHash)
+      )
+    );
 
     // Process results
     for(let i = 0; i < farms.length; i++) {
