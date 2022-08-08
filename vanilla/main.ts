@@ -1,5 +1,5 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import { AttraceQuery, fetchConversionRateToEth, getErc20Decimals } from "./attrace";
+import { AttraceQuery, fetchConversionRateToEth, formatAPR, getErc20Decimals, tokenValueToNumber } from "./attrace";
 
 // Referred token = the token being promoted
 // Reward token = the token being rewarded for promotion
@@ -10,7 +10,7 @@ async function main() {
   
   // Create an instance by chainId
   // RPC provider URL is used for sessions which don't have a local web3 wallet yet.
-  const infuraKey = ''; // Set your infura key here.
+  const infuraKey = '646979134f4d414da7da14a26b32f395'; // Set your infura key here.
   const q = new AttraceQuery(chainId, `https://mainnet.infura.io/v3/${infuraKey}`);
 
   // // Optional: use the wallet chain id and wallet rpc connection if available.
@@ -22,13 +22,7 @@ async function main() {
 
   // Referred token we query for
   const token = '0x44e2dec86b9f0e0266e9aa66e10323a2bd69cf9a'.toLowerCase();
-
-  // Get the decimals of the token from the ERC20 contract, required for correct conversion of the token.
-  const decimals = await q.getErc20Decimals(token);
-  console.log('decimals: ', decimals);
-
-  // Get the exchange rate to ETH of the token, if any.
-  const rates = await fetchConversionRateToEth([token]);
+  console.log('using referred token: '+token);
 
   // Get the time when the first farm was created for a referred token
   const firstFarmTime = await q.getReferredTokenFirstFarmTime(token);
@@ -46,10 +40,13 @@ async function main() {
     console.log(`daily reward for reward token: ${rewardToken}: ${value.toString()}`)
   }
 
-
   // Collect APR data for a referred token
-  // TODO
-  // debugger;
+  const { rewardTokens, decimals, rates } = await q.getReferredTokenAPRByRewardToken(token);
+  for(let [rewardToken, { apr, totalReferredValue, totalRewardValue, totalRemainingRewardValue, farms }] of Object.entries(rewardTokens)) {
+    console.log(`Current APR for ${rewardToken} is ${formatAPR(apr, totalReferredValue)} with ${tokenValueToNumber(totalRemainingRewardValue, decimals[rewardToken])} reward token left`);
+  }
+
+  debugger;
 }
 
 
