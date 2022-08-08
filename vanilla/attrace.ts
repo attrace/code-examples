@@ -68,7 +68,7 @@ export class AttraceQuery {
 
    */
 
-  async getReferredTokenAPRByRewardToken(referredToken: string) : Promise<Record<string, any>> {
+  async getReferredTokenAPRByRewardToken(referredToken: string) : Promise<ReferredTokenAPRInfo> {
     // Get all the farms
     const farms = await this.getFarms(referredToken) as FarmInfoEnriched[];
 
@@ -85,7 +85,7 @@ export class AttraceQuery {
     await Promise.all([p1, p2, p3]);
 
     // Aggregate values by reward token
-    const rewardTokens = {};
+    const rewardTokens: Record<string, RewardTokenFarmInfo> = {};
     for(const farm of farms) {
       const { rewardToken, farmTokenSize, lastConfirmationReward, remainingRewardValue } = farm;
 
@@ -121,14 +121,14 @@ export class AttraceQuery {
     for(const [rewardToken, props] of Object.entries(rewardTokens)) {
       if(tokensToFetch.indexOf(rewardToken) < 0) tokensToFetch.push(rewardToken);
     }
-    let rates = {};
+    let rates: Record<string, number> = {};
     if(tokensToFetch.length > 1) {
       rates = await fetchConversionRateToEth(tokensToFetch);
     }
 
     // Get decimals for all tokens
     const decimalValues = await Promise.all(tokensToFetch.map(t => this.getErc20Decimals(t)));
-    const decimals = {};
+    const decimals: Record<string, number> = {};
     for(let i = 0; i < tokensToFetch.length; i++) {
       decimals[tokensToFetch[i]] = decimalValues[i];
     }
@@ -136,7 +136,6 @@ export class AttraceQuery {
     // Here we have all data, grouped by reward token
     // Now we calculate APR by reward token, normalized by conversion rate to ETH
     // APR is the current _annualised_ rate of return earned in reward token on the referred token based on it's value.
-    const result = {};
     for(const [rewardToken, props] of Object.entries(rewardTokens)) {
       const { totalReferredValue, totalRewardValue, farms } = props;
 
@@ -348,6 +347,35 @@ interface FarmInfoEnriched extends FarmInfo {
   farmTokenSize: BigNumber;
   lastConfirmationReward: BigNumber;
   remainingRewardValue: BigNumber;
+}
+
+interface RewardTokenFarmInfo {
+  // Total referred value across the active farms in raw referred token value
+  totalReferredValue: BigNumber;
+
+  // Total reward value across the active farms in raw reward value, reduced to remaining reward if insufficient deposit
+  totalRewardValue: BigNumber;
+
+  // Total remaining reward value across the active farms
+  totalRemainingRewardValue: BigNumber;
+
+  // Farms active on this referred-reward token pair.
+  farms: FarmInfoEnriched[];
+
+  // The current annualised rate of return earned in reward token on the purchased referred token.
+  // When < 0, the value couldn't be calculated.
+  apr: number;
+}
+
+interface ReferredTokenAPRInfo {
+  // Reward tokens and their APR 
+  rewardTokens: Record<string, RewardTokenFarmInfo>;
+
+  // Decimal number for any of the tokens used.
+  decimals: Record<string, number>;
+
+  // Conversion rates to ETH for any of the tokens used, if different from referred token.
+  rates: Record<string, number>;
 }
 
 export async function fetchConversionRateToEth(tokens: string[] ): Promise<Record<string, number>> {
