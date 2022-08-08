@@ -81,7 +81,6 @@ export class AttraceQuery {
     }));
     const p3 = Promise.all(farms.map(async f => {
       f.remainingRewardValue = await this.getFarmRemainingTrackedRewardValue(f.farmHash);
-      console.log(`${f.remainingRewardValue} for ${f.farmHash}`);
     }))
     await Promise.all([p1, p2, p3]);
 
