@@ -58,16 +58,6 @@ export class AttraceQuery {
     return false;
   }
 
-  /*
-
-  Pair APR:
-  -  Query all farms from indexer for a certain referred token
-  -  Query farmTokenSizes for each of those farms for that referred token, summing these provides total positions size.
-  -  Query lastConfirmedPeriodReward for all those farms (filter by reward token - APRs can only be shown by same reward token, or exchange rates come into play), summing these provides the total rewards per period.
-  -  APR = totalRewardPeriod / totalPositionsSize * 365
-
-   */
-
   async getReferredTokenAPRByRewardToken(referredToken: string) : Promise<ReferredTokenAPRInfo> {
     // Get all the farms
     const farms = await this.getFarms(referredToken) as FarmInfoEnriched[];
@@ -104,9 +94,7 @@ export class AttraceQuery {
 
       // Sum values
       rewardTokens[rewardToken].totalReferredValue = rewardTokens[rewardToken].totalReferredValue.add(farmTokenSize);
-
       rewardTokens[rewardToken].totalRemainingRewardValue = rewardTokens[rewardToken].totalRemainingRewardValue.add(remainingRewardValue);
-
       rewardTokens[rewardToken].totalRewardValue = rewardTokens[rewardToken].totalRewardValue.add(
         remainingRewardValue.lt(lastConfirmationReward) 
         ? remainingRewardValue 
