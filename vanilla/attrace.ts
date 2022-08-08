@@ -153,7 +153,7 @@ export class AttraceQuery {
       // Using conversion rate, calculate the APR
       props.apr =  -1.0;
       const totalReferredValueNum = tokenValueToNumber(totalReferredValue, decimals[referredToken]);
-      const totalRewardValueNum = tokenValueToNumber(totalRewardValue, decimals[rewardToken]);
+      const totalRewardValueNum = tokenValueToNumber(totalRewardValue, decimals[rewardToken]) * rate;
       if(totalReferredValueNum > 0) {
         props.apr = ((totalRewardValueNum * 365.0) / (totalReferredValueNum * 2.0)) * 100.0;
       }

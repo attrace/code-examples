@@ -10,7 +10,7 @@ async function main() {
   
   // Create an instance by chainId
   // RPC provider URL is used for sessions which don't have a local web3 wallet yet.
-  const infuraKey = '646979134f4d414da7da14a26b32f395'; // Set your infura key here.
+  const infuraKey = process.env.INFURA_KEY; // Set your infura key here.
   const q = new AttraceQuery(chainId, `https://mainnet.infura.io/v3/${infuraKey}`);
 
   // // Optional: use the wallet chain id and wallet rpc connection if available.
@@ -21,7 +21,8 @@ async function main() {
   console.log('using chain id: ', q.chainId);
 
   // Referred token we query for
-  const token = '0x44e2dec86b9f0e0266e9aa66e10323a2bd69cf9a'.toLowerCase();
+  const token = '0x3f382dbd960e3a9bbceae22651e88158d2791550'.toLowerCase();
+  // const token = '0x44e2dec86b9f0e0266e9aa66e10323a2bd69cf9a'.toLowerCase();
   console.log('using referred token: '+token);
 
   // Get the time when the first farm was created for a referred token
