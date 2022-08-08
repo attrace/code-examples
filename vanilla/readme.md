@@ -1,4 +1,4 @@
 ```
 yarn
-yarn parcel index.html
+yarn parcel example.html
 ```
