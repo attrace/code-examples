@@ -5,21 +5,20 @@ export class AttraceQuery {
 
   oracleUrl: string;
   chainAddressPrefix: string;
-  rpcProvider: string;
   tryWallet: boolean = false;
   uid: number = 0;
 
   private readonly defaultChainId: number;
 
-  // Create a new instance
-  // Eg: new AttraceQuery(1, 'https://mainnet.infura.io/v3/<key>')
-  constructor(chainId: number, rpcProviderUrl: string) {
+  // Create a new instance, default it lists Ethereum assets.
+  // Eg: new AttraceQuery()
+  constructor(chainId: number = 1) {
     this.defaultChainId = chainId;
-    this.setConfig(chainId, rpcProviderUrl);
+    this.setConfig(chainId);
   }
 
   // Use setConfig to change chainId after an instance was created
-  setConfig(chainId: number, rpcProviderUrl: string) {
+  setConfig(chainId: number) {
     const netConfigs = {
       '1': {
         oracleUrl: 'https://oracle-147-dub.attrace.com',
@@ -31,7 +30,6 @@ export class AttraceQuery {
       },
     }
     this.chainId = chainId;
-    this.rpcProvider = rpcProviderUrl;
     if(netConfigs[chainId.toString()] == null) throw new Error('invalid network');
     this.oracleUrl = netConfigs[chainId.toString()].oracleUrl;
     this.chainAddressPrefix = netConfigs[chainId.toString()].chainAddressPrefix;
@@ -49,7 +47,7 @@ export class AttraceQuery {
     // Loads the chain id of the wallet, if wanted behavior
     if(typeof window.ethereum !== 'undefined' && window.ethereum.isConnected != null && window.ethereum.isConnected() == true) {
       const chainId = BigNumber.from(await window.ethereum.request({ method: 'eth_chainId' })).toNumber();
-      this.setConfig(chainId, this.rpcProvider);
+      this.setConfig(chainId);
       this.tryWallet = true;
 
       return true;
@@ -287,36 +285,9 @@ export class AttraceQuery {
   }
 
   async getErc20Decimals(erc20Hex: string) : Promise<number> {
-    const method = 'eth_call';
-    const params = [
-      {
-        to: erc20Hex, // Contract address
-        data: "0x313ce567" // decimal() function id
-      },
-      "latest"
-    ];
-
-    // Try wallet
-    if(this.tryWallet) {
-      const res = await window.ethereum.request({ method, params });
-      return BigNumber.from(res).toNumber();
-    }
-
-    // Else use infura
-    const req = await fetch(this.rpcProvider, {
-      method: 'POST',
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: (++this.uid).toString(),
-        method,
-        params,
-      }),
-    });
-    if(req.status !== 200) throw new Error(req.statusText);
-    const res = await req.json();
-    if(res.error != null) throw new Error(JSON.stringify(res.error));
-
-    return BigNumber.from(res.result).toNumber();
+    // LATER: use the oracle feature
+    // Default we return 18 for now to avoid infura integration
+    return 18;
   }
 }
 
@@ -384,4 +355,8 @@ export function formatAPR(apr: number, referredValue: BigNumber) : string {
   if(referredValue.eq(0)) return '∞';
   if(apr < 0) return '-';
   return Math.round(apr).toString() + '%';
+}
+
+export function createReferLink(referrer: string, token: string, target: string, router: string) : string {
+  return `https://app.attrace.com/l/${router}/${target}/${token.substring(2)}${referrer.substring(2)}`.toLowerCase();
 }

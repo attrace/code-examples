@@ -1,23 +1,17 @@
-import { BigNumber } from "@ethersproject/bignumber";
-import { AttraceQuery, fetchConversionRateToEth, formatAPR, getErc20Decimals, tokenValueToNumber } from "./attrace";
+import { AttraceQuery, createReferLink, formatAPR, tokenValueToNumber } from "./attrace";
 
 // Referred token = the token being promoted
 // Reward token = the token being rewarded for promotion
 
 // Example fetching all values for 1 referred token
 async function main() {
-  const chainId = 1; // mainnet eth: 1, goerli: 5
-  
-  // Create an instance by chainId
-  // RPC provider URL is used for sessions which don't have a local web3 wallet yet.
-  const infuraKey = process.env.INFURA_KEY; // Set your infura key here.
-  const q = new AttraceQuery(chainId, `https://mainnet.infura.io/v3/${infuraKey}`);
+  // Create an instance
+  const q = new AttraceQuery();
 
   // // Optional: use the wallet chain id and wallet rpc connection if available.
   // if(await q.setTryWalletConnection(true)) {
   //   console.log('using session wallet instead of default network')
   // }
-
   console.log('using chain id: ', q.chainId);
 
   // Referred token we query for
@@ -48,6 +42,10 @@ async function main() {
   for(let [rewardToken, value] of Object.entries(dailyRewards)) {
     console.log(`daily reward for reward token: ${rewardToken}: ${value.toString()}`)
   }
+
+  // Create refer link
+  const promoter = '0x0000000000000000000000000_reward_address';
+  console.log(createReferLink(promoter, token, 'uniswapv3', 'attrace'));
 
   // debugger;
 }
